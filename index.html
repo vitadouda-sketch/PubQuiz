@@ -47,7 +47,7 @@
     .section-label { font-size: 0.9rem; color: #aaa; margin-top: 1rem; display: block; }
 
     /* OBRÁZEK KATEGORIE */
-    .cat-image-box { width: 100%; height: 180px; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; border: 1px solid #333; background-size: cover; background-position: center; }
+    .cat-image-box { width: 100%; height: 220px; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; border: 1px solid #333; background-size: cover; background-position: center; }
 
     /* TÝMY A KICK */
     .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); }
@@ -56,6 +56,7 @@
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #222; }
     th { color: var(--neon-pink); }
+    .icon-col { width: 40px; text-align: center; font-size: 1.2rem; }
   </style>
 </head>
 <body>
@@ -65,7 +66,6 @@
   <!-- LOGO Nahoře -->
   <div class="logo-container">
     <svg class="logo-img" viewBox="0 0 500 160" xmlns="http://www.w3.org/2000/svg">
-      <!-- Hexagonální pozadí v SVG -->
       <g fill="#111116" stroke="#222" stroke-width="2">
         <polygon points="250,15 280,30 280,60 250,75 220,60 220,30" />
         <polygon points="200,45 230,60 230,90 200,105 170,90 170,60" />
@@ -74,7 +74,6 @@
         <polygon points="350,75 380,90 380,120 350,135 320,120 320,90" />
         <polygon points="250,75 280,90 280,120 250,135 220,120 220,90" />
       </g>
-      <!-- Neonový nápis DESKOFFKY -->
       <text x="50%" y="95" font-family="'Segoe UI', sans-serif" font-weight="900" font-size="42" fill="#ff007f" text-anchor="middle" letter-spacing="4" filter="drop-shadow(0px 0px 8px #ff007f)">DESKOFFKY</text>
     </svg>
   </div>
@@ -110,7 +109,6 @@
     </div>
     
     <div id="player-question-box" class="hidden">
-      <!-- Obrázek okruhu na mobilu -->
       <div id="player-cat-img" class="cat-image-box"></div>
       <h3 id="player-q-text" style="margin-bottom:1rem;">-</h3>
       <div id="player-options"></div>
@@ -133,7 +131,6 @@
     </div>
 
     <div id="host-game" class="hidden">
-      <!-- Obrázek okruhu na TV -->
       <div id="host-cat-img" class="cat-image-box"></div>
 
       <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
@@ -146,7 +143,7 @@
         <h3 style="color:var(--green); text-align:left;">Správná odpověď: <span id="host-correct-ans"></span></h3>
         <h3 style="margin-top:1.5rem; text-align:left;">Průběžné Pořadí:</h3>
         <table>
-          <thead><tr><th>#</th><th>Tým</th><th>Body</th></tr></thead>
+          <thead><tr><th class="icon-col"></th><th>#</th><th>Tým</th><th>Body</th></tr></thead>
           <tbody id="leaderboard-body"></tbody>
         </table>
       </div>
@@ -172,16 +169,15 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // TEMATICKÉ OBRÁZKY PRO KATEGORIE
+  // NOVE TEMATICKÉ OBRÁZKY (Hobby Horsing & Pikachu s léky)
   const categoryImages = {
     "Sci-Fi": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop",
-    "Sport": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=600&auto=format&fit=crop",
+    "Sport": "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?q=80&w=600&auto=format&fit=crop", // Hobby Horsing / koník
     "Videohry": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=600&auto=format&fit=crop",
-    "Lék nebo Pokémon?": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop",
+    "Lék nebo Pokémon?": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop", // Zmatený Pikachu koncept / abstraktní art
     "Fantasy": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop"
   };
 
-  // DATABÁZE 55 OTÁZEK
   const questions = [
     // --- SCI-FI (11) ---
     { cat: "Sci-Fi", q: "Z jakého materiálu je tělo mimozemšťana Rockyho v románu Projekt Spasitel?", opts: ["Ocel", "Titan", "Uhlík", "Křemík"], correct: 1 },
@@ -237,11 +233,11 @@
 
     // --- FANTASY (11) ---
     { cat: "Fantasy", q: "V Úžasné Zeměploše od Terryho Pratchetta leží město Ankh-Morpork. Kdo je jeho obávaným i respektovaným Vládcem (Patricijem)?", opts: ["Lord Vetinari", "Mrakoplaš", "Nobby Nobbs", "Samuel Elánius"], correct: 0 },
-    { cat: "Fantasy", q: "V sérii Zaklínač se Geralt učil zaklínačskému řemeslu na starobylé horské pevnosti Školy Vlka. Jak se jmenuje?", opts: ["Novigrad", "Kaer Morhen", "Vizima", "Oxenfurt"], correct: 1 },
+    { cat: "Fantasy", q: "V sérii Zaklínač se Geralt učil zaklínačskému řemeslu na starobylé horské pevnosti Školy Vlka. Jak se jmoveje?", opts: ["Novigrad", "Kaer Morhen", "Vizima", "Oxenfurt"], correct: 1 },
     { cat: "Fantasy", q: "Ve světě Harryho Pottera vyučuje létání na koštěti a působí jako rozhodčí ve Quidditchi profesorka:", opts: ["Madam Hoochová", "Profesorka McGonagallová", "Madam Pomfreyová", "Profesorka Prýtová"], correct: 0 },
     { cat: "Fantasy", q: "V Pánovi prstenů tvoří Společenstvo Prstenu celkem 9 členů. Kolik z nich bylo zástupců rasy hobitů?", opts: ["2", "4", "6", "8"], correct: 1 },
     { cat: "Fantasy", q: "Jak se v Pratchettově Úžasné Zeměploše jmenuje Smrťův kůň, který je zcela živý a bílý?", opts: ["Vraník", "Trnka", "Blesk", "Smrťák"], correct: 1 },
-    { cat: "Fantasy", q: "Ve světě Zaklínače se osudová dívka Ciri celým jnémem nazývá Cirilla Fiona Elen Riannon. Ze kterého království pocházela?", opts: ["Temerie", "Cintra", "Redanie", "Aedirn"], correct: 1 },
+    { cat: "Fantasy", q: "Ve světě Zaklínače se osudová dívka Ciri celým jménem nazývá Cirilla Fiona Elen Riannon. Ze kterého království pocházela?", opts: ["Temerie", "Cintra", "Redanie", "Aedirn"], correct: 1 },
     { cat: "Fantasy", q: "Které zakleté stvoření strážící vchod do podzemní říše Moria napadlo Společenstvo u brány?", opts: ["Balrog", "Vrtal ve vodě (Chobotnatec)", "Kraken", "Skřetí král"], correct: 1 },
     { cat: "Fantasy", q: "Která z Relikvií smrti ve světě Harryho Pottera dokáže přivést zpět stíny zemřelých?", opts: ["Bezbezová hůlka", "Kámen vzkříšení", "Neviditelný plášť", "Gryfondorův meč"], correct: 1 },
     { cat: "Fantasy", q: "Která čarodějka se známou vůní šeříku a angreštu je životní láskou zaklínače Geralta z Rivie?", opts: ["Triss Merigold", "Yennefer z Vengerbergu", "Fringilla Vigo", "Keira Metz"], correct: 1 },
@@ -305,7 +301,8 @@
       name: name, 
       players: playersList, 
       score: 0, 
-      currentAnswer: null 
+      currentAnswer: null,
+      lastCorrect: null
     }).then(() => {
       document.getElementById('view-register').classList.add('hidden');
       document.getElementById('view-player').classList.remove('hidden');
@@ -329,7 +326,6 @@
         document.getElementById('player-question-box').classList.remove('hidden');
         document.getElementById('player-q-text').innerText = qData.q;
         
-        // Nastavení obrázku okruhu pro hráče
         const catImgUrl = categoryImages[qData.cat] || "";
         document.getElementById('player-cat-img').style.backgroundImage = `url('${catImgUrl}')`;
 
@@ -412,12 +408,20 @@
 
   function startNextQuestionHost() {
     currentQIndex++;
-    if (currentQIndex >= questions.length) return alert("Konec kvízu! Všechny otázky byly odehrány.");
+    
+    // FINÁLE KVÍZU
+    if (currentQIndex >= questions.length) {
+      db.ref('gameState').set({ status: 'FINISHED' });
+      alert("Konec kvízu! Zobrazujeme celkové vítěze.");
+      renderFinalLeaderboard();
+      return;
+    }
 
     db.ref('teams').once('value', snapshot => {
       const teams = snapshot.val() || {};
       Object.keys(teams).forEach(k => {
         db.ref(`teams/${k}/currentAnswer`).remove();
+        db.ref(`teams/${k}/lastCorrect`).remove();
       });
     });
 
@@ -431,7 +435,6 @@
     document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1} z ${questions.length}`;
     document.getElementById('host-q-text').innerText = qData.q;
 
-    // Nastavení obrázku okruhu na TV
     const catImgUrl = categoryImages[qData.cat] || "";
     document.getElementById('host-cat-img').style.backgroundImage = `url('${catImgUrl}')`;
 
@@ -447,7 +450,9 @@
     db.ref('teams').once('value', snapshot => {
       const teams = snapshot.val() || {};
       Object.keys(teams).forEach(k => {
-        if (teams[k].currentAnswer === qData.correct) {
+        const isCorrect = teams[k].currentAnswer === qData.correct;
+        db.ref(`teams/${k}/lastCorrect`).set(isCorrect);
+        if (isCorrect) {
           db.ref(`teams/${k}/score`).set((teams[k].score || 0) + 1);
         }
       });
@@ -465,18 +470,50 @@
     btn.style.background = "var(--green)";
   }
 
+  // VYHODNOCENÍ SE ZELENOU KVAČKOU A ČERVENÝM KŘÍŽKEM
   function renderLeaderboard() {
     db.ref('teams').once('value', snapshot => {
       const teams = snapshot.val() || {};
       let sorted = Object.values(teams).sort((a,b) => b.score - a.score);
       
-      document.getElementById('leaderboard-body').innerHTML = sorted.map((t, i) => `
-        <tr>
-          <td>#${i+1}</td>
-          <td><strong>${t.name}</strong></td>
-          <td>${t.score} b.</td>
-        </tr>
-      `).join('');
+      document.getElementById('leaderboard-body').innerHTML = sorted.map((t, i) => {
+        let iconMark = "";
+        if (t.lastCorrect === true) iconMark = "✔️";
+        else if (t.lastCorrect === false) iconMark = "❌";
+
+        return `
+          <tr>
+            <td class="icon-col">${iconMark}</td>
+            <td>#${i+1}</td>
+            <td><strong>${t.name}</strong></td>
+            <td>${t.score} b.</td>
+          </tr>
+        `;
+      }).join('');
+    });
+  }
+
+  // FINÁLNÍ ŽEBŘÍČEK S POHÁREM A MEDAILEMI (NA KONCI KVÍZU)
+  function renderFinalLeaderboard() {
+    db.ref('teams').once('value', snapshot => {
+      const teams = snapshot.val() || {};
+      let sorted = Object.values(teams).sort((a,b) => b.score - a.score);
+      
+      document.getElementById('leaderboard-body').innerHTML = sorted.map((t, i) => {
+        let medalIcon = "";
+        if (i === 0) medalIcon = "🏆";
+        else if (i === 1) medalIcon = "🥈";
+        else if (i === 2) medalIcon = "🥉";
+
+        return `
+          <tr>
+            <td class="icon-col">${medalIcon}</td>
+            <td>#${i+1}</td>
+            <td><strong>${t.name}</strong></td>
+            <td>${t.score} b.</td>
+          </tr>
+        `;
+      }).join('');
     });
   }
 </script>
