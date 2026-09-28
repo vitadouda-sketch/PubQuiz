@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pub Quiz Realtime System</title>
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root { --bg: #121214; --card: #1e1e24; --accent: #ff9f1c; --green: #2ec4b6; --text: #fff; }
@@ -23,12 +22,10 @@
     .status-badge { text-align: center; padding: 0.5rem; background: #333; border-radius: 6px; margin-bottom: 1rem; font-weight: bold; }
     .hidden { display: none !important; }
     
-    /* FORMULÁŘ PRO HRÁČE */
     .players-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
     .players-grid input { margin: 0; font-size: 0.9rem; }
     .section-label { font-size: 0.9rem; color: #aaa; margin-top: 1rem; display: block; }
 
-    /* TABULKA VÝSLEDKŮ */
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #333; }
     th { color: var(--accent); }
@@ -64,7 +61,7 @@
   <div id="view-player" class="hidden">
     <div class="status-badge" id="player-team-title">Tým: -</div>
     <div id="player-status-msg" style="text-align:center; margin: 2rem 0; color: #aaa;">
-      Čekejte na spuštění otázky pořadatelem...
+      ⏳ Čekejte na spuštění otázky pořadatelem...
     </div>
     
     <div id="player-question-box" class="hidden">
@@ -114,18 +111,78 @@
 </div>
 
 <script>
-  // FIREBASE KONFIGURACE S OPRAVENOU REGIONÁLNÍ URL
   const firebaseConfig = {
     databaseURL: "https://muj-kviz-6e835-default-rtdb.europe-west1.firebasedatabase.app"
   };
+  
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // SAMPLE OTÁZEK
   const questions = [
+    // --- SCI-FI (11) ---
     { cat: "Sci-Fi", q: "Z jakého materiálu je tělo mimozemšťana Rockyho v románu Projekt Spasitel?", opts: ["Ocel", "Titan", "Uhlík", "Křemík"], correct: 1 },
-    { cat: "Sport", q: "Který fotbalista vstřelil na MS 1986 gól označený jako 'Ruka Boží'?", opts: ["Pelé", "Diego Maradona", "Johan Cruyff", "Zinedine Zidane"], correct: 1 },
-    { cat: "Videohry", q: "Jak se jmenuje syn Grommashe Hellscreama ve hrách Warcraft?", opts: ["Thrall", "Garrosh", "Saurfang", "Vol'jin"], correct: 1 }
+    { cat: "Sci-Fi", q: "V románu Duna od Franka Herberta je planeta Arrakis jediným zdrojem koreření. Který tvor je klíčový pro jeho vznik?", opts: ["Písečný červ", "Obří škorpión", "Pouštní liška", "Létající ještěr"], correct: 0 },
+    { cat: "Sci-Fi", q: "Ve Stopařově průvodci po Galaxii se počítala odpověď na otázku života, vesmíru a vůbec. Jak se jmenoval superpočítač?", opts: ["HAL 9000", "Hlubina Mysli (Deep Thought)", "Skynet", "Multivac"], correct: 1 },
+    { cat: "Sci-Fi", q: "Která planeta byla zničena první Hvězdou smrti ve filmu Star Wars: Epizoda IV?", opts: ["Tatooine", "Alderaan", "Endor", "Coruscant"], correct: 1 },
+    { cat: "Sci-Fi", q: "Jaký test se ve filmu Blade Runner používá k odhalení replikantů měřením reakcí zornic?", opts: ["Turingův test", "Voight-Kampffův test", "Voight-Rassmussenův test", "Deckardův test"], correct: 1 },
+    { cat: "Sci-Fi", q: "Jak se jmenuje loď hlavních hrdinů pod vedením Jamese Holdena ve sérii The Expanse?", opts: ["Canterbury", "Rocinante", "Enterprise", "Serenity"], correct: 1 },
+    { cat: "Sci-Fi", q: "Jak se jmenuje mikroskopický organismus v Projektu Spasitel, který pohlcuje energii Slunce?", opts: ["Astrofág", "Chrono-vir", "Solaris", "Proton"], correct: 0 },
+    { cat: "Sci-Fi", q: "Kdo napsal klasický sci-fi román Já, robot a formuloval Tři zákony robotiky?", opts: ["Arthur C. Clarke", "Isaac Asimov", "Philip K. Dick", "Stanisław Lem"], correct: 1 },
+    { cat: "Sci-Fi", q: "Jaký pojem označuje anonymního člena výsadku v červené uniformě ve Star Treku, který obvykle zemře?", opts: ["Redshirt", "Rookie", "Vanguard", "Cannon Fodder"], correct: 0 },
+    { cat: "Sci-Fi", q: "Jak se v románu Duna nazývá obří tajný řád ženských adeptek?", opts: ["Bene Gesserit", "Bene Tleilax", "Sardaukar", "Honored Matres"], correct: 0 },
+    { cat: "Sci-Fi", q: "Jaký předmět je podle Stopařova průvodce po Galaxii tím nejpotřebnějším pro každého stopaře?", opts: ["Ručník", "Astro-kompas", "Laserový klíč", "Babel rybka"], correct: 0 },
+
+    // --- SPORT (11) ---
+    { cat: "Sport", q: "Který argentinský fotbalista vstřelil na MS 1986 proti Anglii gól označený jako 'Ruka Boží'?", opts: ["Pelé", "Diego Maradona", "Johan Cruyff", "Lionel Messi"], correct: 1 },
+    { cat: "Sport", q: "Který kanadský hokejista s přezdívkou 'The Great One' drží rekord v počtu bodů v NHL (2 857 bodů)?", opts: ["Mario Lemieux", "Wayne Gretzky", "Sidney Crosby", "Bobby Orr"], correct: 1 },
+    { cat: "Sport", q: "Jak se jmenuje bizarní sport kombinující střídání kol deskové hry na šachovnici a souboje v ringu?", opts: ["Šachový box", "Ring šach", "Kombat Mat", "Punch Chess"], correct: 0 },
+    { cat: "Sport", q: "Jaký je nejvyšší možný nához, kterého může hráč šipek dosáhnout v jednom kole 3 šipkami?", opts: ["150", "180", "200", "300"], correct: 1 },
+    { cat: "Sport", q: "Ve kterém motorsportovém odvětví získal Michael Schumacher celkem 7 titulů mistra světa?", opts: ["MotoGP", "Formule 1", "Rallye WRC", "NASCAR"], correct: 1 },
+    { cat: "Sport", q: "Jak se nazývá bizarní anglická soutěž na kopci Cooper's Hill, kde se běhá ze strmého svahu za běžícím objektu?", opts: ["Koulení sýra", "Hod barelem", "Běh s manželkou", "Skok do bláta"], correct: 0 },
+    { cat: "Sport", q: "Který český hokejový útočník vyhrál v Naganu 1998 zlato a v NHL nastřílel přes 700 gólů?", opts: ["Patrik Eliáš", "Jaromír Jágr", "Martin Ručinský", "Milan Hejduk"], correct: 1 },
+    { cat: "Sport", q: "Jak se jmenuje nejprestižnější individuální fotbalové ocenění pořádané časopisem France Football?", opts: ["Zlatý míč", "Zlatá kopačka", "FIFA World Player", "UEFA Cup"], correct: 0 },
+    { cat: "Sport", q: "Jaká je přesná vzdálenost od odhodové čáry k terči u oficiálních soutěžních šipek?", opts: ["2,15 m", "2,37 m", "2,50 m", "3,00 m"], correct: 1 },
+    { cat: "Sport", q: "Který brazilský fotbalista je jako jediný hráč v historii držitelem tří titulů mistra světa (1958, 1962, 1970)?", opts: ["Ronaldo", "Pelé", "Romário", "Ronaldinho"], correct: 1 },
+    { cat: "Sport", q: "Který zimní sport spočívá v sjíždění ledového koryta na velmi malých saních hlavou napřed?", opts: ["Boby", "Skeleton", "Sáně", "Curling"], correct: 1 },
+
+    // --- VIDEOHRY (11) ---
+    { cat: "Videohry", q: "Jak se jmenuje syn Grommashe Hellscreama, který vedl Železnou hordu ve datadisku Warlords of Draenor?", opts: ["Thrall", "Garrosh Hellscream", "Varok Saurfang", "Durotan"], correct: 1 },
+    { cat: "Videohry", q: "Ve hře League of Legends (LoL) se hlavní herní mapa pro zápasy 5v5 nazývá:", opts: ["Howling Abyss", "Summoner's Rift", "Twisted Treeline", "Crystal Scar"], correct: 1 },
+    { cat: "Videohry", q: "Který z Pánů Pekla je hlavním titulním záporákem v 1. a 2. díle série Diablo?", opts: ["Mephisto", "Diablo", "Baal", "Belial"], correct: 1 },
+    { cat: "Videohry", q: "Ve strategické sérii StarCraft vystupují 3 rasy: Terrani, Protoss a biologický roj. Jak se tento roj nazývá?", opts: ["Zerg", "Borg", "Tyranid", "Flood"], correct: 0 },
+    { cat: "Videohry", q: "Ve hře GTA: San Andreas ovládá hlavní hrdina CJ pouliční gang sídlící v ulici Grove Street. Jak se tento gang jmenuje?", opts: ["Ballas", "Grove Street Families", "Vagos", "Triads"], correct: 1 },
+    { cat: "Videohry", q: "Jak se jmenuje meč paladina Arthase ze hry Warcraft III, který ho proměnil v Lich Kinga?", opts: ["Ashbringer", "Frostmourne", "Shadowmourne", "Thunderfury"], correct: 1 },
+    { cat: "Videohry", q: "Ve hře Diablo II se v tajné úrovni (Secret Level) vytvořené v kostce s Wirtovou nohou vyskytují jaká stvoření?", opts: ["Bojové krávy", "Prasata s meči", "Kostlivci", "Draci"], correct: 0 },
+    { cat: "Videohry", q: "Která ze šampionek v League of Legends je známa jako pirátská kapitánka s dvěma pistolemi z města Bilgewater?", opts: ["Sarah Fortune (Miss Fortune)", "Caitlyn", "Jinx", "Sivir"], correct: 0 },
+    { cat: "Videohry", q: "Ve kterém fiktivním americkém státě se odehrává děj hry Grand Theft Auto V?", opts: ["Liberty City", "San Andreas", "Vice City", "Alderney"], correct: 1 },
+    { cat: "Videohry", q: "Jak se v sérii StarCraft nazývá gigantický psionický organismus, který sloužil jako centrální mozek Zergů?", opts: ["Overmind", "Ultralisk", "Kerrigan", "Cerebrate"], correct: 0 },
+    { cat: "Videohry", q: "V MMORPG World of Warcraft je hlavním městem lidské rasy a Aliance opevněné město:", opts: ["Orgrimmar", "Stormwind", "Ironforge", "Darnassus"], correct: 1 },
+
+    // --- LÉK NEBO POKÉMON? (11) ---
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je ATARAX skutečný lék (sedativum), nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je RAYQUAZA skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je FOONGUS skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je ZOLOFT skutečný lék (antidepresivum), nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je PARAS skutečný lék, nebo Pokémon z 1. generace?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je VENTOLIN skutečný lék (bronchodilatační sprey), nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je MAGNEMITE skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je AMOKSIKLAV skutečný lék (antibiotikum), nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je MAGBY skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je CLARITINE skutečný lék (na alergie), nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je KECLEON skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
+
+    // --- FANTASY (11) ---
+    { cat: "Fantasy", q: "V Úžasné Zeměploše od Terryho Pratchetta leží město Ankh-Morpork. Kdo je jeho obávaným i respektovaným Vládcem (Patricijem)?", opts: ["Lord Vetinari", "Mrakoplaš", "Nobby Nobbs", "Samuel Elánius"], correct: 0 },
+    { cat: "Fantasy", q: "V sérii Zaklínač se Geralt učil zaklínačskému řemeslu na starobylé horské pevnosti Školy Vlka. Jak se jmenuje?", opts: ["Novigrad", "Kaer Morhen", "Vizima", "Oxenfurt"], correct: 1 },
+    { cat: "Fantasy", q: "Ve světě Harryho Pottera vyučuje létání na koštěti a působí jako rozhodčí ve Quidditchi profesorka:", opts: ["Madam Hoochová", "Profesorka McGonagallová", "Madam Pomfreyová", "Profesorka Prýtová"], correct: 0 },
+    { cat: "Fantasy", q: "V Pánovi prstenů tvoří Společenstvo Prstenu celkem 9 členů. Kolik z nich bylo zástupců rasy hobitů?", opts: ["2", "4", "6", "8"], correct: 1 },
+    { cat: "Fantasy", q: "Jak se v Pratchettově Úžasné Zeměploše jmenuje Smrťův kůň, který je zcela živý a bílý?", opts: ["Vraník", "Trnka", "Blesk", "Smrťák"], correct: 1 },
+    { cat: "Fantasy", q: "Ve světě Zaklínače se osudová dívka Ciri celým jménem nazývá Cirilla Fiona Elen Riannon. Ze kterého království pocházela?", opts: ["Temerie", "Cintra", "Redanie", "Aedirn"], correct: 1 },
+    { cat: "Fantasy", q: "Které zakleté stvoření strážící vchod do podzemní říše Moria napadlo Společenstvo u brány?", opts: ["Balrog", "Vrtal ve vodě (Chobotnatec)", "Kraken", "Skřetí král"], correct: 1 },
+    { cat: "Fantasy", q: "Která z Relikvií smrti ve světě Harryho Pottera dokáže přivést zpět stíny zemřelých?", opts: ["Bezbezová hůlka", "Kámen vzkříšení", "Neviditelný plášť", "Gryfondorův meč"], correct: 1 },
+    { cat: "Fantasy", q: "Která čarodějka se známou vůní šeříku a angreštu je životní láskou zaklínače Geralta z Rivie?", opts: ["Triss Merigold", "Yennefer z Vengerbergu", "Fringilla Vigo", "Keira Metz"], correct: 1 },
+    { cat: "Fantasy", q: "Jaké rasy je desátník Nobby Nobbs v Pratchettově Úžasné Zeměploše, u něhož musel Patricij vydat potvrzení, že je člověk?", opts: ["Goblini", "Člověk", "Troll", "Trpaslík"], correct: 1 },
+    { cat: "Fantasy", q: "V trilogii Pán prstenů je Jediný prsten zničen vhodžením do ohně Hory osudu. Kdo nechtěným pádem do lávy způsobil jeho zkázu?", opts: ["Frodo Pytlík", "Glum (Smeagol)", "Samvěd Křepelka", "Sauron"], correct: 1 }
   ];
 
   let myTeamKey = null;
@@ -139,6 +196,9 @@
     document.getElementById('view-host').classList.remove('hidden');
     document.getElementById('view-register').classList.add('hidden');
     
+    // RESET STAVU HRY PŘI NAČTENÍ MODERÁTORA
+    db.ref('gameState').set({ status: 'WAITING', qIndex: -1 });
+
     const joinUrl = currentUrl.split('?')[0];
     new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 160, height: 160 });
     listenHost();
@@ -159,18 +219,20 @@
 
     const teamRef = db.ref('teams').push();
     myTeamKey = teamRef.key;
+    
     teamRef.set({ 
       name: name, 
       players: playersList, 
       score: 0, 
       currentAnswer: null 
+    }).then(() => {
+      document.getElementById('view-register').classList.add('hidden');
+      document.getElementById('view-player').classList.remove('hidden');
+      document.getElementById('player-team-title').innerText = `Tým: ${name}`;
+      listenPlayer();
+    }).catch((error) => {
+      alert("Chyba při zápisu do databáze: " + error.message);
     });
-
-    document.getElementById('view-register').classList.add('hidden');
-    document.getElementById('view-player').classList.remove('hidden');
-    document.getElementById('player-team-title').innerText = `Tým: ${name}`;
-
-    listenPlayer();
   }
 
   function listenPlayer() {
@@ -199,6 +261,11 @@
         document.getElementById('player-question-box').classList.add('hidden');
         document.getElementById('player-status-msg').classList.remove('hidden');
         document.getElementById('player-status-msg').innerHTML = " Vyhodnoceno! Podívejte se na projektor.";
+      } else {
+        // WAITING režim
+        document.getElementById('player-question-box').classList.add('hidden');
+        document.getElementById('player-status-msg').classList.remove('hidden');
+        document.getElementById('player-status-msg').innerHTML = "⏳ Čekejte na spuštění otázky pořadatelem...";
       }
     });
   }
@@ -213,10 +280,13 @@
   function submitPlayerAnswer() {
     if (selectedOption === null || !myTeamKey) return;
     
-    db.ref(`teams/${myTeamKey}/currentAnswer`).set(selectedOption);
-    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-    document.getElementById('player-submit-btn').disabled = true;
-    document.getElementById('player-submit-btn').innerText = "🔒 ODPOVĚĎ ZAMKNUTA A ODESLÁNA";
+    db.ref(`teams/${myTeamKey}/currentAnswer`).set(selectedOption).then(() => {
+      document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+      document.getElementById('player-submit-btn').disabled = true;
+      document.getElementById('player-submit-btn').innerText = "🔒 ODPOVĚĎ ZAMKNUTA A ODESLÁNA";
+    }).catch(err => {
+      alert("Chyba při odesílání odpovědi: " + err.message);
+    });
   }
 
   function listenHost() {
@@ -241,7 +311,7 @@
 
   function startNextQuestionHost() {
     currentQIndex++;
-    if (currentQIndex >= questions.length) return alert("Konec kvízu!");
+    if (currentQIndex >= questions.length) return alert("Konec kvízu! Všechny otázky byly odehrány.");
 
     db.ref('teams').once('value', snapshot => {
       const teams = snapshot.val() || {};
@@ -257,7 +327,7 @@
     document.getElementById('host-results-box').classList.add('hidden');
 
     const qData = questions[currentQIndex];
-    document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1}`;
+    document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1} z ${questions.length}`;
     document.getElementById('host-q-text').innerText = qData.q;
   }
 
