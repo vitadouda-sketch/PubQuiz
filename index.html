@@ -21,7 +21,6 @@
     body { background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 1rem; min-height: 100vh; }
     .container { width: 100%; max-width: 650px; background: var(--card); padding: 1.5rem; border-radius: 16px; border: 1px solid #22222a; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
     
-    /* LOGO HLAVIČKA */
     .logo-container { text-align: center; margin-bottom: 1.5rem; }
     .logo-img { max-width: 280px; width: 80%; height: auto; filter: drop-shadow(0 0 12px var(--neon-pink-glow)); }
 
@@ -46,17 +45,20 @@
     .players-grid input { margin: 0; font-size: 0.9rem; }
     .section-label { font-size: 0.9rem; color: #aaa; margin-top: 1rem; display: block; }
 
-    /* OBRÁZEK KATEGORIE */
     .cat-image-box { width: 100%; height: 220px; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; border: 1px solid #333; background-size: cover; background-position: center; }
 
-    /* TÝMY A KICK */
     .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); }
     .btn-kick { background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 0; width: auto; box-shadow: none; }
+
+    .btn-bonus { background: var(--green); color: #000; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer; margin: 0 0.2rem; width: auto; box-shadow: none; }
+    .btn-bonus:hover { background: #00c494; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #222; }
     th { color: var(--neon-pink); }
     .icon-col { width: 40px; text-align: center; font-size: 1.2rem; }
+    
+    .rep-card { background: #181822; padding: 1rem; margin: 0.5rem 0; border-radius: 8px; border: 1px solid var(--neon-pink); font-size: 1.2rem; }
   </style>
 </head>
 <body>
@@ -108,17 +110,24 @@
       ⏳ Čekejte na spuštění otázky pořadatelem...
     </div>
     
+    <!-- STANDARDNÍ OTÁZKA -->
     <div id="player-question-box" class="hidden">
       <div id="player-cat-img" class="cat-image-box"></div>
       <h3 id="player-q-text" style="margin-bottom:1rem;">-</h3>
       <div id="player-options"></div>
       <button id="player-submit-btn" disabled onclick="submitPlayerAnswer()" style="background: var(--green); color:#000;">POTVRDIT ODPOVĚĎ</button>
     </div>
+
+    <!-- BONUS QUEST SEZNAM HRÁČŮ -->
+    <div id="player-bonus-box" class="hidden">
+      <h2 class="neon-text" id="player-bonus-title">🏆 BONUS QUEST!</h2>
+      <p style="margin-bottom:1rem; text-align:center;">Vyberte zástupce týmu, který jde na pódium:</p>
+      <div id="player-members-list"></div>
+    </div>
   </div>
 
-  <!-- 3. OBRAZOVKA PRO POŘADATELE / TV -->
+  <!-- 3. OBRAZOVKA PRO PLÁTNO / PROJEKTOR (PROJEKCE) -->
   <div id="view-host" class="hidden">
-    
     <div id="host-setup" style="text-align: center;">
       <p style="margin-bottom:1rem; color:#aaa;">Naskenujte QR kód a připojte se do hry:</p>
       <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:1.5rem; background:#fff; padding:10px; border-radius:12px; width:fit-content; margin-left:auto; margin-right:auto;"></div>
@@ -138,6 +147,12 @@
       </div>
       <h2 id="host-q-text" style="font-size:1.6rem; margin:1rem 0; text-align:left;">-</h2>
 
+      <!-- ZOBRAZENÍ ZÁSTUPCŮ NA PÓDIUM -->
+      <div id="host-bonus-representatives" class="hidden">
+        <h3 class="neon-text" style="margin:1.5rem 0 1rem 0;">🎤 Zástupci na pódiu:</h3>
+        <div id="representatives-list"></div>
+      </div>
+
       <div id="host-results-box" class="hidden">
         <h3 style="color:var(--green); text-align:left;">Správná odpověď: <span id="host-correct-ans"></span></h3>
         <h3 style="margin-top:1.5rem; text-align:left;">Průběžné Pořadí:</h3>
@@ -150,11 +165,21 @@
       <div style="margin-top:2rem;">
         <button id="host-action-btn" onclick="handleHostAction()">VYHODNOTIT OTÁZKU</button>
       </div>
-      
-      <div style="margin-top: 2rem; text-align: left;">
-        <h4 style="color:#666;">Správa týmů (Kick/Smazat):</h4>
-        <div id="connected-teams-game-list"></div>
-      </div>
+    </div>
+  </div>
+
+  <!-- 4. ADMINISTRÁTORSKÁ STRÁNKA (?mode=admin) -->
+  <div id="view-admin" class="hidden">
+    <h2 class="neon-text">⚙️ Administrace Kvízu</h2>
+    
+    <div style="margin-bottom:2rem;">
+      <h3>Průběžné Body Týmů & Bonusy:</h3>
+      <div id="admin-bonus-teams-list" style="margin-top:1rem;"></div>
+    </div>
+
+    <div>
+      <h3 style="color:var(--red);">Správa a Mazání Týmů (Kick):</h3>
+      <div id="admin-teams-list"></div>
     </div>
   </div>
 
@@ -177,7 +202,7 @@
   };
 
   const questions = [
-    // --- SCI-FI (11) ---
+    // --- SCI-FI (10 + 1 Bonus) ---
     { cat: "Sci-Fi", q: "Z jakého materiálu je tělo mimozemšťana Rockyho v románu Projekt Spasitel?", opts: ["Ocel", "Titan", "Uhlík", "Křemík"], correct: 1 },
     { cat: "Sci-Fi", q: "V románu Duna od Franka Herberta je planeta Arrakis jediným zdrojem koreření. Který tvor je klíčový pro jeho vznik?", opts: ["Písečný červ", "Obří škorpión", "Pouštní liška", "Létající ještěr"], correct: 0 },
     { cat: "Sci-Fi", q: "Ve Stopařově průvodci po Galaxii se počítala odpověď na otázku života, vesmíru a vůbec. Jak se jmenoval superpočítač?", opts: ["HAL 9000", "Hlubina Mysli (Deep Thought)", "Skynet", "Multivac"], correct: 1 },
@@ -188,9 +213,9 @@
     { cat: "Sci-Fi", q: "Kdo napsal klasický sci-fi román Já, robot a formuloval Tři zákony robotiky?", opts: ["Arthur C. Clarke", "Isaac Asimov", "Philip K. Dick", "Stanisław Lem"], correct: 1 },
     { cat: "Sci-Fi", q: "Jaký pojem označuje anonymního člena výsadku v červené uniformě ve Star Treku, který obvykle zemře?", opts: ["Redshirt", "Rookie", "Vanguard", "Cannon Fodder"], correct: 0 },
     { cat: "Sci-Fi", q: "Jak se v románu Duna nazývá obří tajný řád ženských adeptek?", opts: ["Bene Gesserit", "Bene Tleilax", "Sardaukar", "Honored Matres"], correct: 0 },
-    { cat: "Sci-Fi", q: "Jaký předmět je podle Stopařova průvodce po Galaxii tím nejpotřebnějším pro každého stopaře?", opts: ["Ručník", "Astro-kompas", "Laserový klíč", "Babel rybka"], correct: 0 },
+    { cat: "Sci-Fi", q: "BONUS QUEST: Duel of Fates (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "Duel of Fates" },
 
-    // --- SPORT (11) ---
+    // --- SPORT (10 + 1 Bonus) ---
     { cat: "Sport", q: "Který argentinský fotbalista vstřelil na MS 1986 proti Anglii gól označený jako 'Ruka Boží'?", opts: ["Pelé", "Diego Maradona", "Johan Cruyff", "Lionel Messi"], correct: 1 },
     { cat: "Sport", q: "Který kanadský hokejista s přezdívkou 'The Great One' drží rekord v počtu bodů v NHL (2 857 bodů)?", opts: ["Mario Lemieux", "Wayne Gretzky", "Sidney Crosby", "Bobby Orr"], correct: 1 },
     { cat: "Sport", q: "Jak se jmenuje bizarní sport kombinující střídání kol deskové hry na šachovnici a souboje v ringu?", opts: ["Šachový box", "Ring šach", "Kombat Mat", "Punch Chess"], correct: 0 },
@@ -201,9 +226,9 @@
     { cat: "Sport", q: "Jak se jmenuje nejprestižnější individuální fotbalové ocenění pořádané časopisem France Football?", opts: ["Zlatý míč", "Zlatá kopačka", "FIFA World Player", "UEFA Cup"], correct: 0 },
     { cat: "Sport", q: "Jaká je přesná vzdálenost od odhodové čáry k terči u oficiálních soutěžních šipek?", opts: ["2,15 m", "2,37 m", "2,50 m", "3,00 m"], correct: 1 },
     { cat: "Sport", q: "Který brazilský fotbalista je jako jediný hráč v historii držitelem tří titulů mistra světa (1958, 1962, 1970)?", opts: ["Ronaldo", "Pelé", "Romário", "Ronaldinho"], correct: 1 },
-    { cat: "Sport", q: "Který zimní sport spočívá v sjíždění ledového koryta na velmi malých saních hlavou napřed?", opts: ["Boby", "Skeleton", "Sáně", "Curling"], correct: 1 },
+    { cat: "Sport", q: "BONUS QUEST: Hobby Horsing (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "Hobby Horsing" },
 
-    // --- VIDEOHRY (11) ---
+    // --- VIDEOHRY (10 + 1 Bonus) ---
     { cat: "Videohry", q: "Jak se jmenuje syn Grommashe Hellscreama, který vedl Železnou hordu ve datadisku Warlords of Draenor?", opts: ["Thrall", "Garrosh Hellscream", "Varok Saurfang", "Durotan"], correct: 1 },
     { cat: "Videohry", q: "Ve hře League of Legends (LoL) se hlavní herní mapa pro zápasy 5v5 nazývá:", opts: ["Howling Abyss", "Summoner's Rift", "Twisted Treeline", "Crystal Scar"], correct: 1 },
     { cat: "Videohry", q: "Který z Pánů Pekla je hlavním titulním záporákem v 1. a 2. díle série Diablo?", opts: ["Mephisto", "Diablo", "Baal", "Belial"], correct: 1 },
@@ -214,9 +239,9 @@
     { cat: "Videohry", q: "Která ze šampionek v League of Legends je známa jako pirátská kapitánka s dvěma pistolemi z města Bilgewater?", opts: ["Sarah Fortune (Miss Fortune)", "Caitlyn", "Jinx", "Sivir"], correct: 0 },
     { cat: "Videohry", q: "Ve kterém fiktivním americkém státě se odehrává děj hry Grand Theft Auto V?", opts: ["Liberty City", "San Andreas", "Vice City", "Alderney"], correct: 1 },
     { cat: "Videohry", q: "Jak se v sérii StarCraft nazývá gigantický psionický organismus, který sloužil jako centrální mozek Zergů?", opts: ["Overmind", "Ultralisk", "Kerrigan", "Cerebrate"], correct: 0 },
-    { cat: "Videohry", q: "V MMORPG World of Warcraft je hlavním městem lidské rasy a Aliance opevněné město:", opts: ["Orgrimmar", "Stormwind", "Ironforge", "Darnassus"], correct: 1 },
+    { cat: "Videohry", q: "BONUS QUEST: TBD (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "TBD" },
 
-    // --- LÉK NEBO POKÉMON? (11) ---
+    // --- LÉK NEBO POKÉMON? (10 + 1 Bonus) ---
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je ATARAX skutečný lék (sedativum), nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je RAYQUAZA skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je FOONGUS skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
@@ -227,11 +252,11 @@
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je AMOKSIKLAV skutečný lék (antibiotikum), nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je MAGBY skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je CLARITINE skutečný lék (na alergie), nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
-    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je KECLEON skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
+    { cat: "Lék nebo Pokémon?", q: "BONUS QUEST: Pokemonovaná (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "Pokemonovaná" },
 
-    // --- FANTASY (11) ---
+    // --- FANTASY (10 + 1 Bonus) ---
     { cat: "Fantasy", q: "V Úžasné Zeměploše od Terryho Pratchetta leží město Ankh-Morpork. Kdo je jeho obávaným i respektovaným Vládcem (Patricijem)?", opts: ["Lord Vetinari", "Mrakoplaš", "Nobby Nobbs", "Samuel Elánius"], correct: 0 },
-    { cat: "Fantasy", q: "V sérii Zaklínač se Geralt učil zaklínačskému řemeslu na starobylé horské pevnosti Školy Vlka. Jak se jmenuje?", opts: ["Novigrad", "Kaer Morhen", "Vizima", "Oxenfurt"], correct: 1 },
+    { cat: "Fantasy", q: "V sérii Zaklínač se Geralt učil zaklínačskému řemeslu na starobylé horské pevnosti Školy Vlka. Jak se jmoveje?", opts: ["Novigrad", "Kaer Morhen", "Vizima", "Oxenfurt"], correct: 1 },
     { cat: "Fantasy", q: "Ve světě Harryho Pottera vyučuje létání na koštěti a působí jako rozhodčí ve Quidditchi profesorka:", opts: ["Madam Hoochová", "Profesorka McGonagallová", "Madam Pomfreyová", "Profesorka Prýtová"], correct: 0 },
     { cat: "Fantasy", q: "V Pánovi prstenů tvoří Společenstvo Prstenu celkem 9 členů. Kolik z nich bylo zástupců rasy hobitů?", opts: ["2", "4", "6", "8"], correct: 1 },
     { cat: "Fantasy", q: "Jak se v Pratchettově Úžasné Zeměploše jmenuje Smrťův kůň, který je zcela živý a bílý?", opts: ["Vraník", "Trnka", "Blesk", "Smrťák"], correct: 1 },
@@ -240,7 +265,7 @@
     { cat: "Fantasy", q: "Která z Relikvií smrti ve světě Harryho Pottera dokáže přivést zpět stíny zemřelých?", opts: ["Bezbezová hůlka", "Kámen vzkříšení", "Neviditelný plášť", "Gryfondorův meč"], correct: 1 },
     { cat: "Fantasy", q: "Která čarodějka se známou vůní šeříku a angreštu je životní láskou zaklínače Geralta z Rivie?", opts: ["Triss Merigold", "Yennefer z Vengerbergu", "Fringilla Vigo", "Keira Metz"], correct: 1 },
     { cat: "Fantasy", q: "Jaké rasy je desátník Nobby Nobbs v Pratchettově Úžasné Zeměploše, u něhož musel Patricij vydat potvrzení, že je člověk?", opts: ["Goblini", "Člověk", "Troll", "Trpaslík"], correct: 1 },
-    { cat: "Fantasy", q: "V trilogii Pán prstenů je Jediný prsten zničen vhodžením do ohně Hory osudu. Kdo nechtěným pádem do lávy způsobil jeho zkázu?", opts: ["Frodo Pytlík", "Glum (Smeagol)", "Samvěd Křepelka", "Sauron"], correct: 1 }
+    { cat: "Fantasy", q: "BONUS QUEST: Deskoffky poetry (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "Deskoffky poetry" }
   ];
 
   let myTeamKey = localStorage.getItem('quiz_team_key');
@@ -250,8 +275,12 @@
 
   const currentUrl = window.location.href;
   const isHost = currentUrl.includes('mode=host');
+  const isAdmin = currentUrl.includes('mode=admin');
 
-  if (isHost) {
+  if (isAdmin) {
+    document.getElementById('view-admin').classList.remove('hidden');
+    listenAdmin();
+  } else if (isHost) {
     document.getElementById('view-host').classList.remove('hidden');
     document.getElementById('view-register').classList.add('hidden');
     
@@ -300,7 +329,8 @@
       players: playersList, 
       score: 0, 
       currentAnswer: null,
-      lastCorrect: null
+      lastCorrect: null,
+      representative: null
     }).then(() => {
       document.getElementById('view-register').classList.add('hidden');
       document.getElementById('view-player').classList.remove('hidden');
@@ -320,31 +350,63 @@
         currentQIndex = state.qIndex;
         const qData = questions[currentQIndex];
         
-        document.getElementById('player-status-msg').classList.add('hidden');
-        document.getElementById('player-question-box').classList.remove('hidden');
-        document.getElementById('player-q-text').innerText = qData.q;
-        
-        const catImgUrl = categoryImages[qData.cat] || "";
-        document.getElementById('player-cat-img').style.backgroundImage = `url('${catImgUrl}')`;
+        if (qData.isBonus) {
+          document.getElementById('player-status-msg').classList.add('hidden');
+          document.getElementById('player-question-box').classList.add('hidden');
+          document.getElementById('player-bonus-box').classList.remove('hidden');
+          document.getElementById('player-bonus-title').innerText = `🏆 BONUS: ${qData.bonusName}`;
 
-        const optsContainer = document.getElementById('player-options');
-        optsContainer.innerHTML = '';
-        selectedOption = null;
-        document.getElementById('player-submit-btn').disabled = true;
-        document.getElementById('player-submit-btn').innerText = "POTVRDIT ODPOVĚĎ";
+          db.ref(`teams/${myTeamKey}`).once('value', teamSnap => {
+            const teamData = teamSnap.val() || {};
+            const players = teamData.players || [];
+            
+            const membersContainer = document.getElementById('player-members-list');
+            membersContainer.innerHTML = '';
+            
+            if (players.length === 0) {
+              membersContainer.innerHTML = `<button class="opt-btn" onclick="selectRepresentative('${teamData.name}')">${teamData.name}</button>`;
+            } else {
+              players.forEach(p => {
+                membersContainer.innerHTML += `<button class="opt-btn" onclick="selectRepresentative('${p}')">🎤 ${p}</button>`;
+              });
+            }
+          });
+        } else {
+          document.getElementById('player-bonus-box').classList.add('hidden');
+          document.getElementById('player-status-msg').classList.add('hidden');
+          document.getElementById('player-question-box').classList.remove('hidden');
+          document.getElementById('player-q-text').innerText = qData.q;
+          
+          const catImgUrl = categoryImages[qData.cat] || "";
+          document.getElementById('player-cat-img').style.backgroundImage = `url('${catImgUrl}')`;
 
-        qData.opts.forEach((opt, idx) => {
-          optsContainer.innerHTML += `<button class="opt-btn" onclick="selectOpt(this, ${idx})">${opt}</button>`;
-        });
+          const optsContainer = document.getElementById('player-options');
+          optsContainer.innerHTML = '';
+          selectedOption = null;
+          document.getElementById('player-submit-btn').disabled = true;
+          document.getElementById('player-submit-btn').innerText = "POTVRDIT ODPOVĚĎ";
+
+          qData.opts.forEach((opt, idx) => {
+            optsContainer.innerHTML += `<button class="opt-btn" onclick="selectOpt(this, ${idx})">${opt}</button>`;
+          });
+        }
       } else if (state.status === 'RESULTS') {
+        document.getElementById('player-bonus-box').classList.add('hidden');
         document.getElementById('player-question-box').classList.add('hidden');
         document.getElementById('player-status-msg').classList.remove('hidden');
         document.getElementById('player-status-msg').innerHTML = " Vyhodnoceno! Podívejte se na projektor.";
       } else {
+        document.getElementById('player-bonus-box').classList.add('hidden');
         document.getElementById('player-question-box').classList.add('hidden');
         document.getElementById('player-status-msg').classList.remove('hidden');
         document.getElementById('player-status-msg').innerHTML = "⏳ Čekejte na spuštění otázky pořadatelem...";
       }
+    });
+  }
+
+  function selectRepresentative(memberName) {
+    db.ref(`teams/${myTeamKey}/representative`).set(memberName).then(() => {
+      document.getElementById('player-members-list').innerHTML = `<div class="status-badge" style="color:var(--green);">✅ Zástupce ${memberName} vyslán na pódium!</div>`;
     });
   }
 
@@ -377,23 +439,24 @@
         const playersStr = t.players && t.players.length > 0 ? ` (${t.players.join(', ')})` : '';
         return `<div class="team-item">
                   <div>🟢 <strong>${t.name}</strong>${playersStr}</div>
-                  <button class="btn-kick" onclick="deleteTeam('${k}')">🗑️ Smazat</button>
                 </div>`;
       }).join('');
 
       document.getElementById('connected-teams-list').innerHTML = renderTeamsHtml;
-      document.getElementById('connected-teams-game-list').innerHTML = renderTeamsHtml;
+
+      const repsHtml = teamKeys.map(k => {
+        const t = teams[k];
+        if (t.representative) {
+          return `<div class="rep-card">🎤 <strong>${t.representative}</strong> (${t.name})</div>`;
+        }
+        return '';
+      }).join('');
+      document.getElementById('representatives-list').innerHTML = repsHtml;
 
       let voted = 0;
       teamKeys.forEach(k => { if (teams[k].currentAnswer !== undefined && teams[k].currentAnswer !== null) voted++; });
       document.getElementById('host-votes-count').innerText = `Odhlasováno: ${voted} / ${teamKeys.length}`;
     });
-  }
-
-  function deleteTeam(teamKey) {
-    if (confirm("Opravdu chcete tento tým odstranit?")) {
-      db.ref(`teams/${teamKey}`).remove();
-    }
   }
 
   function handleHostAction() {
@@ -419,6 +482,7 @@
       Object.keys(teams).forEach(k => {
         db.ref(`teams/${k}/currentAnswer`).remove();
         db.ref(`teams/${k}/lastCorrect`).remove();
+        db.ref(`teams/${k}/representative`).remove();
       });
     });
 
@@ -429,7 +493,15 @@
     document.getElementById('host-results-box').classList.add('hidden');
 
     const qData = questions[currentQIndex];
-    document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1} z ${questions.length}`;
+    
+    if (qData.isBonus) {
+      document.getElementById('host-cat-num').innerText = `🏆 BONUS: ${qData.bonusName} | Otázka ${currentQIndex + 1} z ${questions.length}`;
+      document.getElementById('host-bonus-representatives').classList.remove('hidden');
+    } else {
+      document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1} z ${questions.length}`;
+      document.getElementById('host-bonus-representatives').classList.add('hidden');
+    }
+
     document.getElementById('host-q-text').innerText = qData.q;
 
     const catImgUrl = categoryImages[qData.cat] || "";
@@ -510,6 +582,45 @@
         `;
       }).join('');
     });
+  }
+
+  function listenAdmin() {
+    db.ref('teams').on('value', snapshot => {
+      const teams = snapshot.val() || {};
+      const teamKeys = Object.keys(teams);
+
+      document.getElementById('admin-bonus-teams-list').innerHTML = teamKeys.map(k => {
+        const t = teams[k];
+        return `<div class="team-item">
+                  <div><strong>${t.name}</strong> (${t.score || 0} b.)</div>
+                  <div>
+                    <button class="btn-bonus" onclick="addBonusPoints('${k}', 3)">+3 b.</button>
+                    <button class="btn-bonus" onclick="addBonusPoints('${k}', 2)">+2 b.</button>
+                    <button class="btn-bonus" onclick="addBonusPoints('${k}', 1)">+1 b.</button>
+                  </div>
+                </div>`;
+      }).join('');
+
+      document.getElementById('admin-teams-list').innerHTML = teamKeys.map(k => {
+        const t = teams[k];
+        return `<div class="team-item">
+                  <div>🟢 <strong>${t.name}</strong></div>
+                  <button class="btn-kick" onclick="deleteTeam('${k}')">🗑️ Smazat Tým</button>
+                </div>`;
+      }).join('');
+    });
+  }
+
+  function addBonusPoints(teamKey, points) {
+    db.ref(`teams/${teamKey}/score`).transaction(currentScore => {
+      return (currentScore || 0) + points;
+    });
+  }
+
+  function deleteTeam(teamKey) {
+    if (confirm("Opravdu chcete tento tým odstranit?")) {
+      db.ref(`teams/${teamKey}`).remove();
+    }
   }
 </script>
 </body>
