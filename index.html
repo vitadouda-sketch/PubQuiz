@@ -1,0 +1,271 @@
+!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pub Quiz Realtime System</title>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root { --bg: #121214; --card: #1e1e24; --accent: #ff9f1c; --green: #2ec4b6; --text: #fff; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 1rem; }
+    .container { width: 100%; max-width: 600px; background: var(--card); padding: 1.5rem; border-radius: 12px; }
+    h1, h2 { color: var(--accent); margin-bottom: 1rem; text-align: center; }
+    input, button { width: 100%; padding: 0.8rem; margin: 0.5rem 0; border-radius: 8px; border: 1px solid #444; font-size: 1rem; }
+    input { background: #000; color: #fff; }
+    button { background: var(--accent); color: #000; font-weight: bold; border: none; cursor: pointer; }
+    button:disabled { background: #444; color: #888; cursor: not-allowed; }
+    .opt-btn { background: #2b2b36; color: #fff; text-align: left; border: 2px solid #444; }
+    .opt-btn.selected { border-color: var(--accent); background: #3b3b4a; }
+    .status-badge { text-align: center; padding: 0.5rem; background: #333; border-radius: 6px; margin-bottom: 1rem; font-weight: bold; }
+    .hidden { display: none; }
+    /* TV LEADERBOARD */
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #333; }
+    th { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <!-- 1. REGISTRACE HRÁČE (MOBIL) -->
+  <div id="view-register" class="hidden">
+    <h1>📱 Připojení do Kvízu</h1>
+    <input type="text" id="reg-team-name" placeholder="Název týmu (např. Šampioni)">
+    <input type="text" id="reg-players" placeholder="Jména hráčů (např. Petr, Pavel)">
+    <button onclick="registerTeam()">VSTOUPIT DO HRY</button>
+  </div>
+
+  <!-- 2. HRÁČSKÉ ROZHRANÍ (MOBIL) -->
+  <div id="view-player" class="hidden">
+    <div class="status-badge" id="player-team-title">Tým: -</div>
+    <div id="player-status-msg" style="text-align:center; margin: 2rem 0; color: #aaa;">
+      Čekejte na spuštění otázky pořadatelem...
+    </div>
+    
+    <div id="player-question-box" class="hidden">
+      <h3 id="player-q-text" style="margin-bottom:1rem;">-</h3>
+      <div id="player-options"></div>
+      <button id="player-submit-btn" disabled onclick="submitPlayerAnswer()" style="margin-top:1rem; background: var(--green);">POTVRDIT ODPOVĚĎ</button>
+    </div>
+  </div>
+
+  <!-- 3. OBRAZOVKA PRO POŘADATELE / TV -->
+  <div id="view-host" class="hidden">
+    <h2>🎤 Řídicí Panel / TV Projekce</h2>
+    
+    <div id="host-setup" style="text-align: center;">
+      <p style="margin-bottom:1rem;">Naskenujte QR kód a připojte se do hry:</p>
+      <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:1rem;"></div>
+      <h3>Připojené týmy:</h3>
+      <ul id="connected-teams-list" style="list-style:none; padding:1rem 0; color:var(--green);"></ul>
+      <button onclick="startNextQuestionHost()">SPUSTIT 1. OTÁZKU ►</button>
+    </div>
+
+    <div id="host-game" class="hidden">
+      <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+        <span id="host-cat-num" style="color:var(--accent); font-weight:bold;">-</span>
+        <span id="host-votes-count" style="color:var(--green); font-weight:bold;">Odhlasováno: 0 / 0</span>
+      </div>
+      <h2 id="host-q-text" style="font-size:1.8rem; margin:1rem 0;">-</h2>
+
+      <div id="host-results-box" class="hidden">
+        <h3 style="color:var(--green);">Správná odpověď: <span id="host-correct-ans"></span></h3>
+        <h3 style="margin-top:1.5rem;">Průběžné Pořadí:</h3>
+        <table>
+          <thead><tr><th>#</th><th>Tým</th><th>Body</th></tr></thead>
+          <tbody id="leaderboard-body"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:2rem; display:flex; gap:0.5rem;">
+        <button onclick="revealResultsHost()" style="background:var(--green);">VYHODNOTIT OTÁZKU</button>
+        <button onclick="startNextQuestionHost()">DALŠÍ OTÁZKA ►</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // CONFIGURATION FIREBASE (Doplněna tvá databáze)
+  const firebaseConfig = {
+    databaseURL: "https://muj-kviz-6e835-default-rtdb.firebaseio.com"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // DATA OTÁZEK
+  const questions = [
+    { cat: "Sci-Fi", q: "Z jakého materiálu je tělo mimozemšťana Rockyho?", opts: ["Ocel", "Titan", "Uhlík", "Křemík"], correct: 1 },
+    { cat: "Sport", q: "Který fotbalista dal gól označený jako 'Ruka Boží'?", opts: ["Pelé", "Maradona", "Cruyff", "Zidane"], correct: 1 },
+    { cat: "Videohry", q: "Jak se jmenuje syn Grommashe v hrách Warcraft?", opts: ["Thrall", "Garrosh", "Saurfang", "Vol'jin"], correct: 1 }
+  ];
+
+  let myTeamKey = null;
+  let selectedOption = null;
+  let currentQIndex = -1;
+
+  // REŽIMY APLIKACE PODLE URL (?mode=host nebo hráč)
+  const urlParams = new URLSearchParams(window.location.search);
+  const isHost = urlParams.get('mode') === 'host';
+
+  if (isHost) {
+    document.getElementById('view-host').classList.remove('hidden');
+    // Generování QR Kódu
+    const joinUrl = window.location.href.replace('?mode=host', '');
+    new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 160, height: 160 });
+    listenHost();
+  } else {
+    document.getElementById('view-register').classList.remove('hidden');
+  }
+
+  // --- LOGIKA HRÁČE ---
+  function registerTeam() {
+    const name = document.getElementById('reg-team-name').value.trim();
+    const players = document.getElementById('reg-players').value.trim();
+    if (!name) return alert("Zadejte název týmu!");
+
+    const teamRef = db.ref('teams').push();
+    myTeamKey = teamRef.key;
+    teamRef.set({ name: name, players: players, score: 0, currentAnswer: null });
+
+    document.getElementById('view-register').classList.add('hidden');
+    document.getElementById('view-player').classList.remove('hidden');
+    document.getElementById('player-team-title').innerText = `Tým: ${name}`;
+
+    listenPlayer();
+  }
+
+  function listenPlayer() {
+    db.ref('gameState').on('value', snapshot => {
+      const state = snapshot.val();
+      if (!state) return;
+
+      if (state.status === 'QUESTION') {
+        currentQIndex = state.qIndex;
+        const qData = questions[currentQIndex];
+        
+        document.getElementById('player-status-msg').classList.add('hidden');
+        document.getElementById('player-question-box').classList.remove('hidden');
+        document.getElementById('player-q-text').innerText = qData.q;
+        
+        // Vykreslení možností
+        const optsContainer = document.getElementById('player-options');
+        optsContainer.innerHTML = '';
+        selectedOption = null;
+        document.getElementById('player-submit-btn').disabled = true;
+        document.getElementById('player-submit-btn').innerText = "POTVRDIT ODPOVĚĎ";
+
+        qData.opts.forEach((opt, idx) => {
+          optsContainer.innerHTML += `<button class="opt-btn" onclick="selectOpt(this, ${idx})">${opt}</button>`;
+        });
+      } else if (state.status === 'RESULTS') {
+        document.getElementById('player-question-box').classList.add('hidden');
+        document.getElementById('player-status-msg').classList.remove('hidden');
+        document.getElementById('player-status-msg').innerHTML = " Vyhodnoceno! Podívejte se na projektor.";
+      }
+    });
+  }
+
+  function selectOpt(btn, idx) {
+    document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedOption = idx;
+    document.getElementById('player-submit-btn').disabled = false;
+  }
+
+  function submitPlayerAnswer() {
+    if (selectedOption === null || !myTeamKey) return;
+    
+    // Zamknutí
+    db.ref(`teams/${myTeamKey}/currentAnswer`).set(selectedOption);
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    document.getElementById('player-submit-btn').disabled = true;
+    document.getElementById('player-submit-btn').innerText = "🔒 ODPOVĚĎ ZAMKNUTA A ODESLÁNA";
+  }
+
+  // --- LOGIKA POŘADATELE / TV ---
+  function listenHost() {
+    // Sledování týmů
+    db.ref('teams').on('value', snapshot => {
+      const teams = snapshot.val() || {};
+      const teamKeys = Object.keys(teams);
+      
+      // Seznam na úvodní obrazovce
+      const list = document.getElementById('connected-teams-list');
+      list.innerHTML = teamKeys.map(k => `<li>🟢 ${teams[k].name}</li>`).join('');
+
+      // Počítadlo hlasů během otázky
+      let voted = 0;
+      teamKeys.forEach(k => { if (teams[k].currentAnswer !== undefined && teams[k].currentAnswer !== null) voted++; });
+      document.getElementById('host-votes-count').innerText = `Odhlasováno: ${voted} / ${teamKeys.length}`;
+    });
+  }
+
+  function startNextQuestionHost() {
+    currentQIndex++;
+    if (currentQIndex >= questions.length) return alert("Konec kvízu!");
+
+    // Resetovat odpovědi týmů
+    db.ref('teams').once('value', snapshot => {
+      const teams = snapshot.val() || {};
+      Object.keys(teams).forEach(k => {
+        db.ref(`teams/${k}/currentAnswer`).remove();
+      });
+    });
+
+    // Přepnout stav hry na QUESTION
+    db.ref('gameState').set({ status: 'QUESTION', qIndex: currentQIndex });
+
+    document.getElementById('host-setup').classList.add('hidden');
+    document.getElementById('host-game').classList.remove('hidden');
+    document.getElementById('host-results-box').classList.add('hidden');
+
+    const qData = questions[currentQIndex];
+    document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1}`;
+    document.getElementById('host-q-text').innerText = qData.q;
+  }
+
+  function revealResultsHost() {
+    const qData = questions[currentQIndex];
+
+    // Přičtení bodů za správné odpovědi
+    db.ref('teams').once('value', snapshot => {
+      const teams = snapshot.val() || {};
+      Object.keys(teams).forEach(k => {
+        if (teams[k].currentAnswer === qData.correct) {
+          db.ref(`teams/${k}/score`).set((teams[k].score || 0) + 1);
+        }
+      });
+
+      // Vykreslení žebříčku
+      setTimeout(renderLeaderboard, 300);
+    });
+
+    db.ref('gameState/status').set('RESULTS');
+    document.getElementById('host-results-box').classList.remove('hidden');
+    document.getElementById('host-correct-ans').innerText = qData.opts[qData.correct];
+  }
+
+  function renderLeaderboard() {
+    db.ref('teams').once('value', snapshot => {
+      const teams = snapshot.val() || {};
+      let sorted = Object.values(teams).sort((a,b) => b.score - a.score);
+      
+      document.getElementById('leaderboard-body').innerHTML = sorted.map((t, i) => `
+        <tr>
+          <td>#${i+1}</td>
+          <td><strong>${t.name}</strong></td>
+          <td>${t.score} b.</td>
+        </tr>
+      `).join('');
+    });
+  }
+</script>
+</body>
+</html>
