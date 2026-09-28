@@ -114,9 +114,9 @@
 </div>
 
 <script>
-  // FIREBASE KONFIGURACE
+  // FIREBASE KONFIGURACE S OPRAVENOU REGIONÁLNÍ URL
   const firebaseConfig = {
-    databaseURL: "https://muj-kviz-6e835-default-rtdb.firebaseio.com"
+    databaseURL: "https://muj-kviz-6e835-default-rtdb.europe-west1.firebasedatabase.app"
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
@@ -132,7 +132,6 @@
   let selectedOption = null;
   let currentQIndex = -1;
 
-  // SPORTOVNÍ / ROBUSTNÍ DETEKCE MODERÁTORA
   const currentUrl = window.location.href;
   const isHost = currentUrl.includes('mode=host');
 
@@ -140,7 +139,6 @@
     document.getElementById('view-host').classList.remove('hidden');
     document.getElementById('view-register').classList.add('hidden');
     
-    // Generování QR kódu s čistou adresou pro hráče
     const joinUrl = currentUrl.split('?')[0];
     new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 160, height: 160 });
     listenHost();
@@ -149,7 +147,6 @@
     document.getElementById('view-host').classList.add('hidden');
   }
 
-  // REGISTRACE TÝMU A AŽ 8 HRÁČŮ
   function registerTeam() {
     const name = document.getElementById('reg-team-name').value.trim();
     if (!name) return alert("Zadejte název týmu!");
@@ -222,7 +219,6 @@
     document.getElementById('player-submit-btn').innerText = "🔒 ODPOVĚĎ ZAMKNUTA A ODESLÁNA";
   }
 
-  // MODERÁTOR / TV
   function listenHost() {
     db.ref('teams').on('value', snapshot => {
       const teams = snapshot.val() || {};
