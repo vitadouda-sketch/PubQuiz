@@ -3,45 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pub Quiz Realtime System</title>
+  <title>DESKOFFKY - Pub Quiz System</title>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
-    :root { --bg: #121214; --card: #1e1e24; --accent: #ff9f1c; --green: #2ec4b6; --red: #e74c3c; --text: #fff; }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 1rem; }
-    .container { width: 100%; max-width: 650px; background: var(--card); padding: 1.5rem; border-radius: 12px; }
-    h1, h2, h3 { color: var(--accent); margin-bottom: 1rem; text-align: center; }
-    input, button { width: 100%; padding: 0.8rem; margin: 0.4rem 0; border-radius: 8px; border: 1px solid #444; font-size: 1rem; }
-    input { background: #000; color: #fff; }
-    button { background: var(--accent); color: #000; font-weight: bold; border: none; cursor: pointer; margin-top: 1rem; }
-    button:disabled { background: #444; color: #888; cursor: not-allowed; }
-    .opt-btn { background: #2b2b36; color: #fff; text-align: left; border: 2px solid #444; margin: 0.4rem 0; }
-    .opt-btn.selected { border-color: var(--accent); background: #3b3b4a; }
-    .status-badge { text-align: center; padding: 0.5rem; background: #333; border-radius: 6px; margin-bottom: 1rem; font-weight: bold; }
+    :root { 
+      --bg: #0a0a0c; 
+      --card: #141419; 
+      --neon-pink: #ff007f; 
+      --neon-pink-glow: rgba(255, 0, 127, 0.4);
+      --green: #00f0b5; 
+      --red: #ff3366; 
+      --text: #ffffff; 
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 1rem; min-height: 100vh; }
+    .container { width: 100%; max-width: 650px; background: var(--card); padding: 1.5rem; border-radius: 16px; border: 1px solid #22222a; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+    
+    /* LOGO HLAVIČKA */
+    .logo-container { text-align: center; margin-bottom: 1.5rem; }
+    .logo-img { max-width: 280px; width: 80%; height: auto; filter: drop-shadow(0 0 12px var(--neon-pink-glow)); }
+
+    h1, h2, h3 { color: #fff; margin-bottom: 1rem; text-align: center; }
+    .neon-text { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink-glow); }
+
+    input, button { width: 100%; padding: 0.8rem; margin: 0.4rem 0; border-radius: 8px; font-size: 1rem; }
+    input { background: #08080a; color: #fff; border: 1px solid #333; }
+    input:focus { border-color: var(--neon-pink); outline: none; box-shadow: 0 0 8px var(--neon-pink-glow); }
+    
+    button { background: var(--neon-pink); color: #fff; font-weight: bold; border: none; cursor: pointer; margin-top: 1rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; box-shadow: 0 0 15px var(--neon-pink-glow); }
+    button:hover { background: #e00070; transform: translateY(-1px); }
+    button:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; }
+
+    .opt-btn { background: #1c1c24; color: #fff; text-align: left; border: 2px solid #2a2a35; margin: 0.4rem 0; text-transform: none; font-weight: normal; box-shadow: none; }
+    .opt-btn.selected { border-color: var(--neon-pink); background: #281525; box-shadow: 0 0 10px var(--neon-pink-glow); }
+    
+    .status-badge { text-align: center; padding: 0.6rem; background: #1c1c24; border-radius: 8px; margin-bottom: 1rem; font-weight: bold; border: 1px solid #333; }
     .hidden { display: none !important; }
     
     .players-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
     .players-grid input { margin: 0; font-size: 0.9rem; }
     .section-label { font-size: 0.9rem; color: #aaa; margin-top: 1rem; display: block; }
 
-    /* TÝMY A TLAČÍTKO SMAZAT */
-    .team-item { display: flex; justify-content: space-between; align-items: center; background: #121214; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; }
-    .btn-kick { background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 0; width: auto; }
+    /* OBRÁZEK KATEGORIE */
+    .cat-image-box { width: 100%; height: 180px; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; border: 1px solid #333; background-size: cover; background-position: center; }
+
+    /* TÝMY A KICK */
+    .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); }
+    .btn-kick { background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 0; width: auto; box-shadow: none; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #333; }
-    th { color: var(--accent); }
+    th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #222; }
+    th { color: var(--neon-pink); }
   </style>
 </head>
 <body>
 
 <div class="container">
   
+  <!-- LOGO Nahoře -->
+  <div class="logo-container">
+    <svg class="logo-img" viewBox="0 0 500 160" xmlns="http://www.w3.org/2000/svg">
+      <!-- Hexagonální pozadí v SVG -->
+      <g fill="#111116" stroke="#222" stroke-width="2">
+        <polygon points="250,15 280,30 280,60 250,75 220,60 220,30" />
+        <polygon points="200,45 230,60 230,90 200,105 170,90 170,60" />
+        <polygon points="300,45 330,60 330,90 300,105 270,90 270,60" />
+        <polygon points="150,75 180,90 180,120 150,135 120,120 120,90" />
+        <polygon points="350,75 380,90 380,120 350,135 320,120 320,90" />
+        <polygon points="250,75 280,90 280,120 250,135 220,120 220,90" />
+      </g>
+      <!-- Neonový nápis DESKOFFKY -->
+      <text x="50%" y="95" font-family="'Segoe UI', sans-serif" font-weight="900" font-size="42" fill="#ff007f" text-anchor="middle" letter-spacing="4" filter="drop-shadow(0px 0px 8px #ff007f)">DESKOFFKY</text>
+    </svg>
+  </div>
+
   <!-- 1. REGISTRACE HRÁČE (MOBIL) -->
   <div id="view-register" class="hidden">
-    <h1>📱 Připojení do Kvízu</h1>
+    <h2>📱 Připojení do Kvízu</h2>
     
     <label class="section-label">Název týmu *</label>
     <input type="text" id="reg-team-name" placeholder="např. Šampioni z Mostu">
@@ -64,14 +104,17 @@
   <!-- 2. HRÁČSKÉ ROZHRANÍ (MOBIL) -->
   <div id="view-player" class="hidden">
     <div class="status-badge" id="player-team-title">Tým: -</div>
+    
     <div id="player-status-msg" style="text-align:center; margin: 2rem 0; color: #aaa;">
       ⏳ Čekejte na spuštění otázky pořadatelem...
     </div>
     
     <div id="player-question-box" class="hidden">
+      <!-- Obrázek okruhu na mobilu -->
+      <div id="player-cat-img" class="cat-image-box"></div>
       <h3 id="player-q-text" style="margin-bottom:1rem;">-</h3>
       <div id="player-options"></div>
-      <button id="player-submit-btn" disabled onclick="submitPlayerAnswer()" style="background: var(--green);">POTVRDIT ODPOVĚĎ</button>
+      <button id="player-submit-btn" disabled onclick="submitPlayerAnswer()" style="background: var(--green); color:#000;">POTVRDIT ODPOVĚĎ</button>
     </div>
   </div>
 
@@ -80,8 +123,8 @@
     <h2>🎤 Řídicí Panel / TV Projekce</h2>
     
     <div id="host-setup" style="text-align: center;">
-      <p style="margin-bottom:1rem;">Naskenujte QR kód a připojte se do hry:</p>
-      <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:1rem;"></div>
+      <p style="margin-bottom:1rem; color:#aaa;">Naskenujte QR kód a připojte se do hry:</p>
+      <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:1.5rem; background:#fff; padding:10px; border-radius:12px; width:fit-content; margin-left:auto; margin-right:auto;"></div>
       
       <h3>Připojené týmy:</h3>
       <div id="connected-teams-list" style="text-align:left; margin:1rem 0;"></div>
@@ -90,28 +133,30 @@
     </div>
 
     <div id="host-game" class="hidden">
+      <!-- Obrázek okruhu na TV -->
+      <div id="host-cat-img" class="cat-image-box"></div>
+
       <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
-        <span id="host-cat-num" style="color:var(--accent); font-weight:bold;">-</span>
+        <span id="host-cat-num" style="color:var(--neon-pink); font-weight:bold;">-</span>
         <span id="host-votes-count" style="color:var(--green); font-weight:bold;">Odhlasováno: 0 / 0</span>
       </div>
-      <h2 id="host-q-text" style="font-size:1.8rem; margin:1rem 0;">-</h2>
+      <h2 id="host-q-text" style="font-size:1.6rem; margin:1rem 0; text-align:left;">-</h2>
 
       <div id="host-results-box" class="hidden">
-        <h3 style="color:var(--green);">Správná odpověď: <span id="host-correct-ans"></span></h3>
-        <h3 style="margin-top:1.5rem;">Průběžné Pořadí:</h3>
+        <h3 style="color:var(--green); text-align:left;">Správná odpověď: <span id="host-correct-ans"></span></h3>
+        <h3 style="margin-top:1.5rem; text-align:left;">Průběžné Pořadí:</h3>
         <table>
           <thead><tr><th>#</th><th>Tým</th><th>Body</th></tr></thead>
           <tbody id="leaderboard-body"></tbody>
         </table>
       </div>
 
-      <!-- JEDINO DYNAMICKÉ TLAČÍTKO -->
       <div style="margin-top:2rem;">
-        <button id="host-action-btn" onclick="handleHostAction()" style="background:var(--green);">VYHODNOTIT OTÁZKU</button>
+        <button id="host-action-btn" onclick="handleHostAction()">VYHODNOTIT OTÁZKU</button>
       </div>
       
       <div style="margin-top: 2rem; text-align: left;">
-        <h4 style="color:#aaa;">Správa týmů (Kick/Smazat):</h4>
+        <h4 style="color:#666;">Správa týmů (Kick/Smazat):</h4>
         <div id="connected-teams-game-list"></div>
       </div>
     </div>
@@ -127,6 +172,16 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
+  // TEMATICKÉ OBRÁZKY PRO KATEGORIE
+  const categoryImages = {
+    "Sci-Fi": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop",
+    "Sport": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=600&auto=format&fit=crop",
+    "Videohry": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=600&auto=format&fit=crop",
+    "Lék nebo Pokémon?": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop",
+    "Fantasy": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop"
+  };
+
+  // DATABÁZE 55 OTÁZEK
   const questions = [
     // --- SCI-FI (11) ---
     { cat: "Sci-Fi", q: "Z jakého materiálu je tělo mimozemšťana Rockyho v románu Projekt Spasitel?", opts: ["Ocel", "Titan", "Uhlík", "Křemík"], correct: 1 },
@@ -186,7 +241,7 @@
     { cat: "Fantasy", q: "Ve světě Harryho Pottera vyučuje létání na koštěti a působí jako rozhodčí ve Quidditchi profesorka:", opts: ["Madam Hoochová", "Profesorka McGonagallová", "Madam Pomfreyová", "Profesorka Prýtová"], correct: 0 },
     { cat: "Fantasy", q: "V Pánovi prstenů tvoří Společenstvo Prstenu celkem 9 členů. Kolik z nich bylo zástupců rasy hobitů?", opts: ["2", "4", "6", "8"], correct: 1 },
     { cat: "Fantasy", q: "Jak se v Pratchettově Úžasné Zeměploše jmenuje Smrťův kůň, který je zcela živý a bílý?", opts: ["Vraník", "Trnka", "Blesk", "Smrťák"], correct: 1 },
-    { cat: "Fantasy", q: "Ve světě Zaklínače se osudová dívka Ciri celým jménem nazývá Cirilla Fiona Elen Riannon. Ze kterého království pocházela?", opts: ["Temerie", "Cintra", "Redanie", "Aedirn"], correct: 1 },
+    { cat: "Fantasy", q: "Ve světě Zaklínače se osudová dívka Ciri celým jnémem nazývá Cirilla Fiona Elen Riannon. Ze kterého království pocházela?", opts: ["Temerie", "Cintra", "Redanie", "Aedirn"], correct: 1 },
     { cat: "Fantasy", q: "Které zakleté stvoření strážící vchod do podzemní říše Moria napadlo Společenstvo u brány?", opts: ["Balrog", "Vrtal ve vodě (Chobotnatec)", "Kraken", "Skřetí král"], correct: 1 },
     { cat: "Fantasy", q: "Která z Relikvií smrti ve světě Harryho Pottera dokáže přivést zpět stíny zemřelých?", opts: ["Bezbezová hůlka", "Kámen vzkříšení", "Neviditelný plášť", "Gryfondorův meč"], correct: 1 },
     { cat: "Fantasy", q: "Která čarodějka se známou vůní šeříku a angreštu je životní láskou zaklínače Geralta z Rivie?", opts: ["Triss Merigold", "Yennefer z Vengerbergu", "Fringilla Vigo", "Keira Metz"], correct: 1 },
@@ -197,7 +252,7 @@
   let myTeamKey = localStorage.getItem('quiz_team_key');
   let selectedOption = null;
   let currentQIndex = -1;
-  let hostStateMode = "REVEAL"; // "REVEAL" pro vyhodnocení, "NEXT" pro další otázku
+  let hostStateMode = "REVEAL";
 
   const currentUrl = window.location.href;
   const isHost = currentUrl.includes('mode=host');
@@ -274,6 +329,10 @@
         document.getElementById('player-question-box').classList.remove('hidden');
         document.getElementById('player-q-text').innerText = qData.q;
         
+        // Nastavení obrázku okruhu pro hráče
+        const catImgUrl = categoryImages[qData.cat] || "";
+        document.getElementById('player-cat-img').style.backgroundImage = `url('${catImgUrl}')`;
+
         const optsContainer = document.getElementById('player-options');
         optsContainer.innerHTML = '';
         selectedOption = null;
@@ -343,7 +402,6 @@
     }
   }
 
-  // JEDNO DYNAMICKÉ TLAČÍTKO PRO MODERÁTORA
   function handleHostAction() {
     if (hostStateMode === "REVEAL") {
       revealResultsHost();
@@ -373,11 +431,14 @@
     document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1} z ${questions.length}`;
     document.getElementById('host-q-text').innerText = qData.q;
 
-    // Přepnutí tlačítka do režimu VYHODNOTIT
+    // Nastavení obrázku okruhu na TV
+    const catImgUrl = categoryImages[qData.cat] || "";
+    document.getElementById('host-cat-img').style.backgroundImage = `url('${catImgUrl}')`;
+
     hostStateMode = "REVEAL";
     const btn = document.getElementById('host-action-btn');
     btn.innerText = "VYHODNOTIT OTÁZKU";
-    btn.style.background = "var(--green)";
+    btn.style.background = "var(--neon-pink)";
   }
 
   function revealResultsHost() {
@@ -398,11 +459,10 @@
     document.getElementById('host-results-box').classList.remove('hidden');
     document.getElementById('host-correct-ans').innerText = qData.opts[qData.correct];
 
-    // Přepnutí tlačítka do režimu DALŠÍ OTÁZKA
     hostStateMode = "NEXT";
     const btn = document.getElementById('host-action-btn');
     btn.innerText = "DALŠÍ OTÁZKA ►";
-    btn.style.background = "var(--accent)";
+    btn.style.background = "var(--green)";
   }
 
   function renderLeaderboard() {
