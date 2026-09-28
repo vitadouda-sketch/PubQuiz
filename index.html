@@ -19,7 +19,7 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     body { background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 1rem; min-height: 100vh; }
-    .container { width: 100%; max-width: 650px; background: var(--card); padding: 1.5rem; border-radius: 16px; border: 1px solid #22222a; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+    .container { width: 100%; max-width: 650px; background: var(--card); padding: 1.5rem; border-radius: 16px; border: 1px solid #22222a; box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; }
     
     .logo-container { text-align: center; margin-bottom: 1.5rem; }
     .logo-img { max-width: 280px; width: 80%; height: auto; filter: drop-shadow(0 0 12px var(--neon-pink-glow)); }
@@ -59,11 +59,14 @@
     .icon-col { width: 40px; text-align: center; font-size: 1.2rem; }
     
     .rep-card { background: #181822; padding: 1rem; margin: 0.5rem 0; border-radius: 8px; border: 1px solid var(--neon-pink); font-size: 1.2rem; text-align: center; }
+    
+    .btn-fs { background: #22222d; color: #aaa; border: 1px solid #444; font-size: 0.8rem; padding: 0.4rem 0.8rem; margin: 0 0 1rem 0; box-shadow: none; width: auto; text-transform: none; }
+    .btn-fs:hover { background: #333344; color: #fff; }
   </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="app-container">
   
   <!-- LOGO Nahoře -->
   <div class="logo-container">
@@ -128,14 +131,16 @@
 
   <!-- 3. OBRAZOVKA PRO PLÁTNO / PROJEKTOR (PROJEKCE) -->
   <div id="view-host" class="hidden">
+    <div style="text-align: right;">
+      <button class="btn-fs" onclick="toggleFullscreen()">🖥️ CELÁ OBRAZOVKA</button>
+    </div>
+
     <div id="host-setup" style="text-align: center;">
       <p style="margin-bottom:1rem; color:#aaa;">Naskenujte QR kód a připojte se do hry:</p>
       <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:1.5rem; background:#fff; padding:10px; border-radius:12px; width:fit-content; margin-left:auto; margin-right:auto;"></div>
       
       <h3>Připojené týmy:</h3>
       <div id="connected-teams-list" style="text-align:left; margin:1rem 0;"></div>
-      
-      <button onclick="startNextQuestionHost()">SPUSTIT 1. OTÁZKU ►</button>
     </div>
 
     <div id="host-game" class="hidden">
@@ -166,17 +171,21 @@
           <tbody id="leaderboard-body"></tbody>
         </table>
       </div>
-
-      <div style="margin-top:2rem;">
-        <button id="host-action-btn" onclick="handleHostAction()">VYHODNOTIT OTÁZKU</button>
-      </div>
     </div>
   </div>
 
   <!-- 4. ADMINISTRÁTORSKÁ STRÁNKA (?mode=admin) -->
   <div id="view-admin" class="hidden">
-    <h2 class="neon-text">⚙️ Administrace Kvízu</h2>
+    <h2 class="neon-text">⚙️ Administrace a Řízení Kvízu</h2>
     
+    <!-- OVLÁDÁNÍ HRY (TLAČÍTKA AKCÍ) -->
+    <div style="background: #111118; padding: 1rem; border-radius: 12px; border: 1px solid var(--neon-pink); margin-bottom: 1.5rem; text-align: center;">
+      <h3 style="color: var(--green); margin-bottom: 0.5rem;" id="admin-status-text">Stav hry: Čekání na spuštění</h3>
+      <p id="admin-votes-text" style="color: #aaa; font-size: 0.9rem; margin-bottom: 1rem;">Odhlasováno: 0 / 0</p>
+      
+      <button id="admin-action-btn" onclick="handleHostAction()">SPUSTIT 1. OTÁZKU ►</button>
+    </div>
+
     <div style="margin-bottom:2rem;">
       <h3>Průběžné Body Týmů & Bonusy:</h3>
       <div id="admin-bonus-teams-list" style="margin-top:1rem;"></div>
@@ -198,10 +207,9 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // UPRAVENÝ OBRÁZEK PRO SPORT -> HOBBY HORSING
   const categoryImages = {
     "Sci-Fi": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop",
-    "Sport": "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop", // Hobby Horsing / Koník motiv
+    "Sport": "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop",
     "Videohry": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=600&auto=format&fit=crop",
     "Lék nebo Pokémon?": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop",
     "Fantasy": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop"
@@ -277,7 +285,7 @@
   let myTeamKey = localStorage.getItem('quiz_team_key');
   let selectedOption = null;
   let currentQIndex = -1;
-  let hostStateMode = "REVEAL";
+  let hostStateMode = "START";
 
   const currentUrl = window.location.href;
   const isHost = currentUrl.includes('mode=host');
@@ -286,6 +294,7 @@
   if (isAdmin) {
     document.getElementById('view-admin').classList.remove('hidden');
     listenAdmin();
+    listenHost();
   } else if (isHost) {
     document.getElementById('view-host').classList.remove('hidden');
     document.getElementById('view-register').classList.add('hidden');
@@ -462,20 +471,64 @@
       let voted = 0;
       teamKeys.forEach(k => { if (teams[k].currentAnswer !== undefined && teams[k].currentAnswer !== null) voted++; });
       document.getElementById('host-votes-count').innerText = `Odhlasováno: ${voted} / ${teamKeys.length}`;
+      if (isAdmin) {
+        document.getElementById('admin-votes-text').innerText = `Odhlasováno: ${voted} / ${teamKeys.length}`;
+      }
 
-      // V PŘÍPADĚ ZOBRAZENÍ VÝSLEDKŮ RE-RENDERUJEME LEADERBOARD
       const qData = questions[currentQIndex];
       if (qData && hostStateMode === "NEXT") {
+        renderLeaderboard();
+      }
+    });
+
+    db.ref('gameState').on('value', snapshot => {
+      const state = snapshot.val();
+      if (!state) return;
+
+      if (state.status === 'QUESTION') {
+        currentQIndex = state.qIndex;
+        const qData = questions[currentQIndex];
+
+        document.getElementById('host-setup').classList.add('hidden');
+        document.getElementById('host-game').classList.remove('hidden');
+        document.getElementById('host-results-box').classList.add('hidden');
+
+        if (qData.isBonus) {
+          document.getElementById('host-cat-num').innerText = `🏆 BONUS GAME | Hra ${currentQIndex + 1} z ${questions.length}`;
+          document.getElementById('host-standard-box').classList.add('hidden');
+          document.getElementById('host-bonus-representatives').classList.remove('hidden');
+          document.getElementById('host-bonus-title-screen').innerText = `🏆 ${qData.bonusName}`;
+        } else {
+          document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1} z ${questions.length}`;
+          document.getElementById('host-standard-box').classList.remove('hidden');
+          document.getElementById('host-bonus-representatives').classList.add('hidden');
+          document.getElementById('host-q-text').innerText = qData.q;
+        }
+
+        const catImgUrl = categoryImages[qData.cat] || "";
+        document.getElementById('host-cat-img').style.backgroundImage = `url('${catImgUrl}')`;
+      } else if (state.status === 'RESULTS') {
+        const qData = questions[currentQIndex];
+        document.getElementById('host-bonus-representatives').classList.add('hidden');
+        document.getElementById('host-standard-box').classList.add('hidden');
+        document.getElementById('host-results-box').classList.remove('hidden');
+
+        if (qData && !qData.isBonus) {
+          document.getElementById('host-correct-ans-container').classList.remove('hidden');
+          document.getElementById('host-correct-ans').innerText = qData.opts[qData.correct];
+        } else {
+          document.getElementById('host-correct-ans-container').classList.add('hidden');
+        }
         renderLeaderboard();
       }
     });
   }
 
   function handleHostAction() {
-    if (hostStateMode === "REVEAL") {
-      revealResultsHost();
-    } else {
+    if (hostStateMode === "START" || hostStateMode === "NEXT") {
       startNextQuestionHost();
+    } else if (hostStateMode === "REVEAL") {
+      revealResultsHost();
     }
   }
 
@@ -500,35 +553,16 @@
 
     db.ref('gameState').set({ status: 'QUESTION', qIndex: currentQIndex });
 
-    document.getElementById('host-setup').classList.add('hidden');
-    document.getElementById('host-game').classList.remove('hidden');
-    document.getElementById('host-results-box').classList.add('hidden');
-
-    const qData = questions[currentQIndex];
-    
-    if (qData.isBonus) {
-      document.getElementById('host-cat-num').innerText = `🏆 BONUS GAME | Hra ${currentQIndex + 1} z ${questions.length}`;
-      document.getElementById('host-standard-box').classList.add('hidden');
-      document.getElementById('host-bonus-representatives').classList.remove('hidden');
-      document.getElementById('host-bonus-title-screen').innerText = `🏆 ${qData.bonusName}`;
-    } else {
-      document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1} z ${questions.length}`;
-      document.getElementById('host-standard-box').classList.remove('hidden');
-      document.getElementById('host-bonus-representatives').classList.add('hidden');
-      document.getElementById('host-q-text').innerText = qData.q;
-    }
-
-    const catImgUrl = categoryImages[qData.cat] || "";
-    document.getElementById('host-cat-img').style.backgroundImage = `url('${catImgUrl}')`;
-
     hostStateMode = "REVEAL";
-    const btn = document.getElementById('host-action-btn');
-    if (qData.isBonus) {
-      btn.innerText = "VYHODNOTIT BONUS (ZOBRAZIT BODY)";
-    } else {
-      btn.innerText = "VYHODNOTIT OTÁZKU";
+    const qData = questions[currentQIndex];
+    const btn = document.getElementById('admin-action-btn');
+    if (btn) {
+      btn.innerText = qData.isBonus ? "VYHODNOTIT BONUS (ZOBRAZIT BODY)" : "VYHODNOTIT OTÁZKU";
+      btn.style.background = "var(--neon-pink)";
     }
-    btn.style.background = "var(--neon-pink)";
+    if (document.getElementById('admin-status-text')) {
+      document.getElementById('admin-status-text').innerText = `Otázka ${currentQIndex + 1} z ${questions.length}: ${qData.cat}`;
+    }
   }
 
   function revealResultsHost() {
@@ -544,26 +578,17 @@
             db.ref(`teams/${k}/score`).set((teams[k].score || 0) + 1);
           }
         });
-
-        setTimeout(renderLeaderboard, 300);
       });
-      document.getElementById('host-correct-ans-container').classList.remove('hidden');
-      document.getElementById('host-correct-ans').innerText = qData.opts[qData.correct];
-    } else {
-      // PRO BONUS SKRYJEME TEXT O SPRÁVNÉ ODPOVĚDI A ZOBRAZÍME ROVNOU LEADERBOARD S BODY Z ADMINA
-      document.getElementById('host-correct-ans-container').classList.add('hidden');
-      renderLeaderboard();
     }
 
     db.ref('gameState/status').set('RESULTS');
-    document.getElementById('host-bonus-representatives').classList.add('hidden');
-    document.getElementById('host-standard-box').classList.add('hidden');
-    document.getElementById('host-results-box').classList.remove('hidden');
 
     hostStateMode = "NEXT";
-    const btn = document.getElementById('host-action-btn');
-    btn.innerText = "DALŠÍ OTÁZKA ►";
-    btn.style.background = "var(--green)";
+    const btn = document.getElementById('admin-action-btn');
+    if (btn) {
+      btn.innerText = "DALŠÍ OTÁZKA ►";
+      btn.style.background = "var(--green)";
+    }
   }
 
   function renderLeaderboard() {
@@ -650,6 +675,18 @@
   function deleteTeam(teamKey) {
     if (confirm("Opravdu chcete tento tým odstranit?")) {
       db.ref(`teams/${teamKey}`).remove();
+    }
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        alert(`Chyba při přepínání do režimu celé obrazovky: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
     }
   }
 </script>
