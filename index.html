@@ -105,12 +105,11 @@
         </table>
       </div>
 
-      <div style="margin-top:2rem; display:flex; gap:0.5rem;">
-        <button onclick="revealResultsHost()" style="background:var(--green);">VYHODNOTIT OTÁZKU</button>
-        <button onclick="startNextQuestionHost()">DALŠÍ OTÁZKA ►</button>
+      <!-- JEDINO DYNAMICKÉ TLAČÍTKO -->
+      <div style="margin-top:2rem;">
+        <button id="host-action-btn" onclick="handleHostAction()" style="background:var(--green);">VYHODNOTIT OTÁZKU</button>
       </div>
       
-      <!-- SEZNAM TÝMŮ I S MOŽNOSTÍ SMAZÁNÍ BĚHEM HRY -->
       <div style="margin-top: 2rem; text-align: left;">
         <h4 style="color:#aaa;">Správa týmů (Kick/Smazat):</h4>
         <div id="connected-teams-game-list"></div>
@@ -128,7 +127,6 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // 55 OTÁZEK
   const questions = [
     // --- SCI-FI (11) ---
     { cat: "Sci-Fi", q: "Z jakého materiálu je tělo mimozemšťana Rockyho v románu Projekt Spasitel?", opts: ["Ocel", "Titan", "Uhlík", "Křemík"], correct: 1 },
@@ -199,6 +197,7 @@
   let myTeamKey = localStorage.getItem('quiz_team_key');
   let selectedOption = null;
   let currentQIndex = -1;
+  let hostStateMode = "REVEAL"; // "REVEAL" pro vyhodnocení, "NEXT" pro další otázku
 
   const currentUrl = window.location.href;
   const isHost = currentUrl.includes('mode=host');
@@ -207,14 +206,12 @@
     document.getElementById('view-host').classList.remove('hidden');
     document.getElementById('view-register').classList.add('hidden');
     
-    // RESET STAVU PŘI SPOŠTĚNÍ MODERÁTORA
     db.ref('gameState').set({ status: 'WAITING', qIndex: -1 });
 
     const joinUrl = currentUrl.split('?')[0];
     new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 160, height: 160 });
     listenHost();
   } else {
-    // POKUD UŽ HRÁČ MÁ ULOŽENÝ KLÍČ (OBNOVENÍ STRÁNKY)
     if (myTeamKey) {
       db.ref(`teams/${myTeamKey}`).once('value', snapshot => {
         if (snapshot.exists()) {
@@ -224,7 +221,6 @@
           document.getElementById('player-team-title').innerText = `Tým: ${tData.name}`;
           listenPlayer();
         } else {
-          // Pokud byl tým smazán moderátorem
           localStorage.removeItem('quiz_team_key');
           myTeamKey = null;
           document.getElementById('view-register').classList.remove('hidden');
@@ -248,7 +244,6 @@
     const teamRef = db.ref('teams').push();
     myTeamKey = teamRef.key;
     
-    // ULOŽENÍ KLÍČE DO PAMĚTI PROHLÍŽEČE
     localStorage.setItem('quiz_team_key', myTeamKey);
 
     teamRef.set({ 
@@ -342,10 +337,18 @@
     });
   }
 
-  // ODSTRANĚNÍ / KICKNUTÍ TÝMU MODERÁTOREM
   function deleteTeam(teamKey) {
     if (confirm("Opravdu chcete tento tým odstranit?")) {
       db.ref(`teams/${teamKey}`).remove();
+    }
+  }
+
+  // JEDNO DYNAMICKÉ TLAČÍTKO PRO MODERÁTORA
+  function handleHostAction() {
+    if (hostStateMode === "REVEAL") {
+      revealResultsHost();
+    } else {
+      startNextQuestionHost();
     }
   }
 
@@ -369,6 +372,12 @@
     const qData = questions[currentQIndex];
     document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1} z ${questions.length}`;
     document.getElementById('host-q-text').innerText = qData.q;
+
+    // Přepnutí tlačítka do režimu VYHODNOTIT
+    hostStateMode = "REVEAL";
+    const btn = document.getElementById('host-action-btn');
+    btn.innerText = "VYHODNOTIT OTÁZKU";
+    btn.style.background = "var(--green)";
   }
 
   function revealResultsHost() {
@@ -388,6 +397,12 @@
     db.ref('gameState/status').set('RESULTS');
     document.getElementById('host-results-box').classList.remove('hidden');
     document.getElementById('host-correct-ans').innerText = qData.opts[qData.correct];
+
+    // Přepnutí tlačítka do režimu DALŠÍ OTÁZKA
+    hostStateMode = "NEXT";
+    const btn = document.getElementById('host-action-btn');
+    btn.innerText = "DALŠÍ OTÁZKA ►";
+    btn.style.background = "var(--accent)";
   }
 
   function renderLeaderboard() {
