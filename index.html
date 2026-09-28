@@ -8,7 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
-    :root { --bg: #121214; --card: #1e1e24; --accent: #ff9f1c; --green: #2ec4b6; --text: #fff; }
+    :root { --bg: #121214; --card: #1e1e24; --accent: #ff9f1c; --green: #2ec4b6; --red: #e74c3c; --text: #fff; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
     body { background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 1rem; }
     .container { width: 100%; max-width: 650px; background: var(--card); padding: 1.5rem; border-radius: 12px; }
@@ -25,6 +25,10 @@
     .players-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
     .players-grid input { margin: 0; font-size: 0.9rem; }
     .section-label { font-size: 0.9rem; color: #aaa; margin-top: 1rem; display: block; }
+
+    /* TÝMY A TLAČÍTKO SMAZAT */
+    .team-item { display: flex; justify-content: space-between; align-items: center; background: #121214; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; }
+    .btn-kick { background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 0; width: auto; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #333; }
@@ -105,6 +109,12 @@
         <button onclick="revealResultsHost()" style="background:var(--green);">VYHODNOTIT OTÁZKU</button>
         <button onclick="startNextQuestionHost()">DALŠÍ OTÁZKA ►</button>
       </div>
+      
+      <!-- SEZNAM TÝMŮ I S MOŽNOSTÍ SMAZÁNÍ BĚHEM HRY -->
+      <div style="margin-top: 2rem; text-align: left;">
+        <h4 style="color:#aaa;">Správa týmů (Kick/Smazat):</h4>
+        <div id="connected-teams-game-list"></div>
+      </div>
     </div>
   </div>
 
@@ -118,6 +128,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
+  // 55 OTÁZEK
   const questions = [
     // --- SCI-FI (11) ---
     { cat: "Sci-Fi", q: "Z jakého materiálu je tělo mimozemšťana Rockyho v románu Projekt Spasitel?", opts: ["Ocel", "Titan", "Uhlík", "Křemík"], correct: 1 },
@@ -185,7 +196,7 @@
     { cat: "Fantasy", q: "V trilogii Pán prstenů je Jediný prsten zničen vhodžením do ohně Hory osudu. Kdo nechtěným pádem do lávy způsobil jeho zkázu?", opts: ["Frodo Pytlík", "Glum (Smeagol)", "Samvěd Křepelka", "Sauron"], correct: 1 }
   ];
 
-  let myTeamKey = null;
+  let myTeamKey = localStorage.getItem('quiz_team_key');
   let selectedOption = null;
   let currentQIndex = -1;
 
@@ -196,15 +207,32 @@
     document.getElementById('view-host').classList.remove('hidden');
     document.getElementById('view-register').classList.add('hidden');
     
-    // RESET STAVU HRY PŘI NAČTENÍ MODERÁTORA
+    // RESET STAVU PŘI SPOŠTĚNÍ MODERÁTORA
     db.ref('gameState').set({ status: 'WAITING', qIndex: -1 });
 
     const joinUrl = currentUrl.split('?')[0];
     new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 160, height: 160 });
     listenHost();
   } else {
-    document.getElementById('view-register').classList.remove('hidden');
-    document.getElementById('view-host').classList.add('hidden');
+    // POKUD UŽ HRÁČ MÁ ULOŽENÝ KLÍČ (OBNOVENÍ STRÁNKY)
+    if (myTeamKey) {
+      db.ref(`teams/${myTeamKey}`).once('value', snapshot => {
+        if (snapshot.exists()) {
+          const tData = snapshot.val();
+          document.getElementById('view-register').classList.add('hidden');
+          document.getElementById('view-player').classList.remove('hidden');
+          document.getElementById('player-team-title').innerText = `Tým: ${tData.name}`;
+          listenPlayer();
+        } else {
+          // Pokud byl tým smazán moderátorem
+          localStorage.removeItem('quiz_team_key');
+          myTeamKey = null;
+          document.getElementById('view-register').classList.remove('hidden');
+        }
+      });
+    } else {
+      document.getElementById('view-register').classList.remove('hidden');
+    }
   }
 
   function registerTeam() {
@@ -220,6 +248,9 @@
     const teamRef = db.ref('teams').push();
     myTeamKey = teamRef.key;
     
+    // ULOŽENÍ KLÍČE DO PAMĚTI PROHLÍŽEČE
+    localStorage.setItem('quiz_team_key', myTeamKey);
+
     teamRef.set({ 
       name: name, 
       players: playersList, 
@@ -262,7 +293,6 @@
         document.getElementById('player-status-msg').classList.remove('hidden');
         document.getElementById('player-status-msg').innerHTML = " Vyhodnoceno! Podívejte se na projektor.";
       } else {
-        // WAITING režim
         document.getElementById('player-question-box').classList.add('hidden');
         document.getElementById('player-status-msg').classList.remove('hidden');
         document.getElementById('player-status-msg').innerHTML = "⏳ Čekejte na spuštění otázky pořadatelem...";
@@ -294,19 +324,29 @@
       const teams = snapshot.val() || {};
       const teamKeys = Object.keys(teams);
       
-      const list = document.getElementById('connected-teams-list');
-      list.innerHTML = teamKeys.map(k => {
+      const renderTeamsHtml = teamKeys.map(k => {
         const t = teams[k];
         const playersStr = t.players && t.players.length > 0 ? ` (${t.players.join(', ')})` : '';
-        return `<div style="background:#121214; padding:0.5rem; margin:0.3rem 0; border-radius:6px; color:var(--green);">
-                  🟢 <strong>${t.name}</strong>${playersStr}
+        return `<div class="team-item">
+                  <div>🟢 <strong>${t.name}</strong>${playersStr}</div>
+                  <button class="btn-kick" onclick="deleteTeam('${k}')">🗑️ Smazat</button>
                 </div>`;
       }).join('');
+
+      document.getElementById('connected-teams-list').innerHTML = renderTeamsHtml;
+      document.getElementById('connected-teams-game-list').innerHTML = renderTeamsHtml;
 
       let voted = 0;
       teamKeys.forEach(k => { if (teams[k].currentAnswer !== undefined && teams[k].currentAnswer !== null) voted++; });
       document.getElementById('host-votes-count').innerText = `Odhlasováno: ${voted} / ${teamKeys.length}`;
     });
+  }
+
+  // ODSTRANĚNÍ / KICKNUTÍ TÝMU MODERÁTOREM
+  function deleteTeam(teamKey) {
+    if (confirm("Opravdu chcete tento tým odstranit?")) {
+      db.ref(`teams/${teamKey}`).remove();
+    }
   }
 
   function startNextQuestionHost() {
