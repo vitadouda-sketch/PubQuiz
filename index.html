@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>DESKOFFKY - Pub Quiz System</title>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -18,20 +18,36 @@
       --text: #ffffff; 
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-    body { background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 1rem; min-height: 100vh; }
+    body { background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; height: 100vh; overflow: hidden; padding: 0.5rem; }
     
     /* REŽIM HOST / PLÁTNO - Zamezení scrollbaru a responzivní přizpůsobení */
     body.host-mode {
       padding: 1vh 2vw;
       height: 100vh;
-      overflow: hidden; /* Zakáže jakýkoliv scrollbar na plátně */
+      overflow: hidden;
     }
     
-    .container { width: 100%; max-width: 650px; background: var(--card); padding: 1.5rem; border-radius: 16px; border: 1px solid #22222a; box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; transition: all 0.3s ease; }
+    .container { 
+      width: 100%; 
+      max-width: 600px; 
+      height: 98vh;
+      max-height: 98vh;
+      background: var(--card); 
+      padding: 1rem; 
+      border-radius: 16px; 
+      border: 1px solid #22222a; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+      position: relative; 
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
     
     body.host-mode .container { 
       max-width: 95vw; 
       height: 96vh;
+      max-height: 96vh;
       padding: 1.5rem 2rem; 
       border-radius: 20px; 
       display: flex;
@@ -40,33 +56,35 @@
       overflow: hidden;
     }
     
-    .logo-container { text-align: center; margin-bottom: 1rem; }
-    .logo-img { max-width: 280px; width: 80%; height: auto; filter: drop-shadow(0 0 12px var(--neon-pink-glow)); }
-    body.host-mode .logo-img { max-width: 260px; height: 50px; } /* Zmenšené logo pro plátno */
+    .logo-container { text-align: center; margin-bottom: 0.5rem; flex-shrink: 0; }
+    .logo-img { max-width: 200px; width: 60%; height: auto; filter: drop-shadow(0 0 12px var(--neon-pink-glow)); }
+    body.host-mode .logo-img { max-width: 260px; height: 50px; }
 
-    h1, h2, h3 { color: #fff; margin-bottom: 0.8rem; text-align: center; }
+    h1, h2, h3 { color: #fff; margin-bottom: 0.5rem; text-align: center; }
     .neon-text { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink-glow); }
 
-    input, button { width: 100%; padding: 0.8rem; margin: 0.4rem 0; border-radius: 8px; font-size: 1rem; }
+    input, button { width: 100%; padding: 0.7rem; margin: 0.3rem 0; border-radius: 8px; font-size: 0.95rem; }
     input { background: #08080a; color: #fff; border: 1px solid #333; }
     input:focus { border-color: var(--neon-pink); outline: none; box-shadow: 0 0 8px var(--neon-pink-glow); }
     
-    button { background: var(--neon-pink); color: #fff; font-weight: bold; border: none; cursor: pointer; margin-top: 1rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; box-shadow: 0 0 15px var(--neon-pink-glow); }
+    button { background: var(--neon-pink); color: #fff; font-weight: bold; border: none; cursor: pointer; margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; box-shadow: 0 0 15px var(--neon-pink-glow); flex-shrink: 0; }
     button:hover { background: #e00070; transform: translateY(-1px); }
     button:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; }
 
-    .opt-btn { background: #1c1c24; color: #fff; text-align: left; border: 2px solid #2a2a35; margin: 0.4rem 0; text-transform: none; font-weight: normal; box-shadow: none; }
+    .opt-btn { background: #1c1c24; color: #fff; text-align: left; border: 2px solid #2a2a35; margin: 0.25rem 0; text-transform: none; font-weight: normal; box-shadow: none; padding: 0.6rem 0.8rem; font-size: 0.9rem; }
     .opt-btn.selected { border-color: var(--neon-pink); background: #281525; box-shadow: 0 0 10px var(--neon-pink-glow); }
     
-    .status-badge { text-align: center; padding: 0.6rem; background: #1c1c24; border-radius: 8px; margin-bottom: 1rem; font-weight: bold; border: 1px solid #333; }
+    .status-badge { text-align: center; padding: 0.5rem; background: #1c1c24; border-radius: 8px; margin-bottom: 0.5rem; font-weight: bold; border: 1px solid #333; flex-shrink: 0; font-size: 0.9rem; }
     .hidden { display: none !important; }
     
-    .players-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
-    .players-grid input { margin: 0; font-size: 0.9rem; }
-    .section-label { font-size: 0.9rem; color: #aaa; margin-top: 1rem; display: block; }
+    /* Mobilní formuláře a scrolovatelný vnitřek */
+    .mobile-view-box { display: flex; flex-direction: column; justify-content: space-between; height: 100%; overflow: hidden; }
+    .players-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; margin-top: 0.3rem; overflow-y: auto; max-height: 38vh; padding-right: 2px; }
+    .players-grid input { margin: 0; font-size: 0.85rem; padding: 0.5rem; }
+    .section-label { font-size: 0.85rem; color: #aaa; margin-top: 0.4rem; display: block; }
 
-    .cat-image-box { width: 100%; height: 220px; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; border: 1px solid #333; background-size: cover; background-position: center; }
-    body.host-mode .cat-image-box { height: 180px; border-radius: 12px; margin-bottom: 0.8rem; } /* Optimalizovaná výška obrázku */
+    .cat-image-box { width: 100%; height: 140px; max-height: 20vh; border-radius: 12px; overflow: hidden; margin-bottom: 0.5rem; border: 1px solid #333; background-size: cover; background-position: center; flex-shrink: 0; }
+    body.host-mode .cat-image-box { height: 180px; max-height: None; border-radius: 12px; margin-bottom: 0.8rem; }
 
     .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); }
     .btn-kick { background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 0; width: auto; box-shadow: none; }
@@ -75,8 +93,8 @@
     .btn-bonus:hover { background: #00c494; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
-    th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #222; }
-    body.host-mode th, body.host-mode td { font-size: 1.1rem; padding: 0.4rem 0.8rem; } /* Kompaktnější řádky pro tabulku výsledků */
+    th, td { padding: 0.6rem; text-align: left; border-bottom: 1px solid #222; }
+    body.host-mode th, body.host-mode td { font-size: 1.1rem; padding: 0.4rem 0.8rem; }
     th { color: var(--neon-pink); }
     .icon-col { width: 40px; text-align: center; font-size: 1.1rem; }
     
@@ -84,6 +102,15 @@
     
     .btn-launch-fs { background: #1c1c28; color: var(--green); border: 1px solid var(--green); font-size: 0.9rem; padding: 0.6rem; border-radius: 8px; margin-bottom: 1rem; cursor: pointer; text-transform: uppercase; font-weight: bold; }
     .btn-launch-fs:hover { background: #00f0b522; }
+
+    .correct-ans-card {
+      background: rgba(0, 240, 181, 0.1);
+      border: 2px solid var(--green);
+      border-radius: 10px;
+      padding: 0.8rem 1.2rem;
+      margin-bottom: 1rem;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
@@ -106,47 +133,51 @@
   </div>
 
   <!-- 1. REGISTRACE HRÁČE (MOBIL) -->
-  <div id="view-register" class="hidden">
-    <h2>📱 Připojení do Kvízu</h2>
-    
-    <label class="section-label">Název týmu *</label>
-    <input type="text" id="reg-team-name" placeholder="např. Šampioni z Mostu">
+  <div id="view-register" class="hidden mobile-view-box">
+    <div>
+      <h2 style="font-size:1.2rem;">📱 Připojení do Kvízu</h2>
+      
+      <label class="section-label">Název týmu *</label>
+      <input type="text" id="reg-team-name" placeholder="např. Šampioni z Mostu">
 
-    <label class="section-label">Členové týmu (až 8 hráčů):</label>
-    <div class="players-grid">
-      <input type="text" class="player-input" placeholder="Hráč 1">
-      <input type="text" class="player-input" placeholder="Hráč 2">
-      <input type="text" class="player-input" placeholder="Hráč 3">
-      <input type="text" class="player-input" placeholder="Hráč 4">
-      <input type="text" class="player-input" placeholder="Hráč 5">
-      <input type="text" class="player-input" placeholder="Hráč 6">
-      <input type="text" class="player-input" placeholder="Hráč 7">
-      <input type="text" class="player-input" placeholder="Hráč 8">
+      <label class="section-label">Členové týmu (až 8 hráčů):</label>
+      <div class="players-grid">
+        <input type="text" class="player-input" placeholder="Hráč 1">
+        <input type="text" class="player-input" placeholder="Hráč 2">
+        <input type="text" class="player-input" placeholder="Hráč 3">
+        <input type="text" class="player-input" placeholder="Hráč 4">
+        <input type="text" class="player-input" placeholder="Hráč 5">
+        <input type="text" class="player-input" placeholder="Hráč 6">
+        <input type="text" class="player-input" placeholder="Hráč 7">
+        <input type="text" class="player-input" placeholder="Hráč 8">
+      </div>
     </div>
 
     <button onclick="registerTeam()">VSTOUPIT DO HRY</button>
   </div>
 
   <!-- 2. HRÁČSKÉ ROZHRANÍ (MOBIL) -->
-  <div id="view-player" class="hidden">
+  <div id="view-player" class="hidden mobile-view-box">
     <div class="status-badge" id="player-team-title">Tým: -</div>
     
-    <div id="player-status-msg" style="text-align:center; margin: 2rem 0; color: #aaa;">
+    <div id="player-status-msg" style="text-align:center; margin: auto 0; color: #aaa; font-size: 1rem;">
       ⏳ Čekejte na spuštění otázky pořadatelem...
     </div>
     
     <!-- STANDARDNÍ OTÁZKA -->
-    <div id="player-question-box" class="hidden">
-      <div id="player-cat-img" class="cat-image-box"></div>
-      <h3 id="player-q-text" style="margin-bottom:1rem;">-</h3>
-      <div id="player-options"></div>
+    <div id="player-question-box" class="hidden" style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+      <div>
+        <div id="player-cat-img" class="cat-image-box"></div>
+        <h3 id="player-q-text" style="margin-bottom:0.4rem; font-size: 1rem; line-height: 1.2;">-</h3>
+        <div id="player-options"></div>
+      </div>
       <button id="player-submit-btn" disabled onclick="submitPlayerAnswer()" style="background: var(--green); color:#000;">POTVRDIT ODPOVĚĎ</button>
     </div>
 
     <!-- BONUS QUEST SEZNAM HRÁČŮ -->
-    <div id="player-bonus-box" class="hidden">
-      <h2 class="neon-text" id="player-bonus-title">🏆 BONUS QUEST!</h2>
-      <p style="margin-bottom:1rem; text-align:center;">Vyberte zástupce týmu, který jde na pódium:</p>
+    <div id="player-bonus-box" class="hidden" style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+      <h2 class="neon-text" id="player-bonus-title" style="font-size: 1.4rem;">🏆 BONUS QUEST!</h2>
+      <p style="margin-bottom:1rem; text-align:center; font-size: 0.9rem;">Vyberte zástupce týmu, který jde na pódium:</p>
       <div id="player-members-list"></div>
     </div>
   </div>
@@ -182,8 +213,12 @@
       </div>
 
       <div id="host-results-box" class="hidden">
-        <h3 id="host-correct-ans-container" style="color:var(--green); text-align:left; font-size: 1.3rem; margin-bottom: 0.5rem;">Správná odpověď: <span id="host-correct-ans"></span></h3>
-        <h3 style="margin-top:0.8rem; text-align:left; font-size: 1.2rem;">Průběžné Pořadí:</h3>
+        <div id="host-correct-ans-container" class="correct-ans-card">
+          <p style="font-size: 0.95rem; color: #aaa; margin-bottom: 0.2rem;" id="host-result-q-label">Otázka: -</p>
+          <h3 style="color:var(--green); text-align:left; font-size: 1.3rem; margin: 0;">Správná odpověď: <span id="host-correct-ans"></span></h3>
+        </div>
+
+        <h3 style="margin-top:0.5rem; text-align:left; font-size: 1.2rem;">Průběžné Pořadí:</h3>
         <table>
           <thead><tr><th class="icon-col"></th><th>#</th><th>Tým</th><th>Body</th></tr></thead>
           <tbody id="leaderboard-body"></tbody>
@@ -193,7 +228,7 @@
   </div>
 
   <!-- 4. ADMINISTRÁTORSKÁ STRÁNKA (?mode=admin) -->
-  <div id="view-admin" class="hidden">
+  <div id="view-admin" class="hidden" style="overflow-y: auto; height: 100%;">
     <h2 class="neon-text">⚙️ Administrace a Řízení Kvízu</h2>
     
     <button class="btn-launch-fs" onclick="launchHostFullscreen()">🖥️ OTEVŘÍT PLÁTNO NA CELOU OBRAZOVKU</button>
@@ -280,9 +315,9 @@
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je RAYQUAZA skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je FOONGUS skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je ZOLOFT skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
-    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je PARAS skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je SKELAXIN skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 }, // TĚŽŠÍ OTÁZKA: Lék (Skelaxin / Metaxalon)
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je VENTOLIN skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
-    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je MAGNEMITE skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je CELEBI skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 }, // TĚŽŠÍ OTÁZKA: Pokémon (Legendární Celebi)
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je AMOKSIKLAV skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je MAGBY skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je CLARITINE skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
@@ -550,6 +585,7 @@
 
         if (qData && !qData.isBonus) {
           if(document.getElementById('host-correct-ans-container')) document.getElementById('host-correct-ans-container').classList.remove('hidden');
+          if(document.getElementById('host-result-q-label')) document.getElementById('host-result-q-label').innerText = `Otázka: ${qData.q}`;
           if(document.getElementById('host-correct-ans')) document.getElementById('host-correct-ans').innerText = qData.opts[qData.correct];
         } else {
           if(document.getElementById('host-correct-ans-container')) document.getElementById('host-correct-ans-container').classList.add('hidden');
