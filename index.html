@@ -77,14 +77,14 @@
     .status-badge { text-align: center; padding: 0.5rem; background: #1c1c24; border-radius: 8px; margin-bottom: 0.5rem; font-weight: bold; border: 1px solid #333; flex-shrink: 0; font-size: 0.9rem; }
     .hidden { display: none !important; }
     
-    /* Mobilní formuláře a scrolovatelný vnitřek */
+    /* Mobilní formuláře a zobrazení */
     .mobile-view-box { display: flex; flex-direction: column; justify-content: space-between; height: 100%; overflow: hidden; }
     .players-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; margin-top: 0.3rem; overflow-y: auto; max-height: 38vh; padding-right: 2px; }
     .players-grid input { margin: 0; font-size: 0.85rem; padding: 0.5rem; }
     .section-label { font-size: 0.85rem; color: #aaa; margin-top: 0.4rem; display: block; }
 
-    .cat-image-box { width: 100%; height: 140px; max-height: 20vh; border-radius: 12px; overflow: hidden; margin-bottom: 0.5rem; border: 1px solid #333; background-size: cover; background-position: center; flex-shrink: 0; }
-    body.host-mode .cat-image-box { height: 180px; max-height: None; border-radius: 12px; margin-bottom: 0.8rem; }
+    .cat-image-box { width: 100%; height: 120px; max-height: 18vh; border-radius: 12px; overflow: hidden; margin-bottom: 0.4rem; border: 1px solid #333; background-size: cover; background-position: center; flex-shrink: 0; }
+    body.host-mode .cat-image-box { height: 180px; max-height: none; border-radius: 12px; margin-bottom: 0.8rem; }
 
     .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); }
     .btn-kick { background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 0; width: auto; box-shadow: none; }
@@ -165,13 +165,13 @@
     </div>
     
     <!-- STANDARDNÍ OTÁZKA -->
-    <div id="player-question-box" class="hidden" style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
-      <div>
+    <div id="player-question-box" class="hidden" style="display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; overflow: hidden;">
+      <div style="overflow-y: auto; padding-right: 2px; flex-grow: 1;">
         <div id="player-cat-img" class="cat-image-box"></div>
-        <h3 id="player-q-text" style="margin-bottom:0.4rem; font-size: 1rem; line-height: 1.2;">-</h3>
+        <h3 id="player-q-text" style="margin-bottom:0.4rem; font-size: 0.95rem; line-height: 1.2;">-</h3>
         <div id="player-options"></div>
       </div>
-      <button id="player-submit-btn" disabled onclick="submitPlayerAnswer()" style="background: var(--green); color:#000;">POTVRDIT ODPOVĚĎ</button>
+      <button id="player-submit-btn" disabled onclick="submitPlayerAnswer()" style="background: var(--green); color:#000; margin-top: 0.4rem; flex-shrink: 0;">POTVRDIT ODPOVĚĎ</button>
     </div>
 
     <!-- BONUS QUEST SEZNAM HRÁČŮ -->
@@ -315,9 +315,9 @@
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je RAYQUAZA skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je FOONGUS skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je ZOLOFT skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
-    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je SKELAXIN skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 }, // TĚŽŠÍ OTÁZKA: Lék (Skelaxin / Metaxalon)
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je SKELAXIN skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je VENTOLIN skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
-    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je CELEBI skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 }, // TĚŽŠÍ OTÁZKA: Pokémon (Legendární Celebi)
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je CELEBI skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je AMOKSIKLAV skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je MAGBY skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je CLARITINE skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
