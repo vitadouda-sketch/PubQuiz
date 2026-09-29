@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>DESKOFFKY - Pub Quiz System</title>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -18,19 +18,32 @@
       --text: #ffffff; 
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-    body { background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; height: 100vh; overflow: hidden; padding: 0.5rem; }
     
+    html, body {
+      height: 100dvh;
+      width: 100vw;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0.5rem;
+    }
+    
+    /* REŽIM HOST / PLÁTNO */
     body.host-mode {
       padding: 1vh 2vw;
-      height: 100vh;
-      overflow: hidden;
     }
     
     .container { 
       width: 100%; 
       max-width: 600px; 
-      height: 98vh;
-      max-height: 98vh;
+      height: 100%;
+      max-height: 100dvh;
       background: var(--card); 
       padding: 0.8rem; 
       border-radius: 16px; 
@@ -39,27 +52,21 @@
       position: relative; 
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
       overflow: hidden;
     }
     
     body.host-mode .container { 
       max-width: 95vw; 
-      height: 96vh;
-      max-height: 96vh;
+      height: 96dvh;
       padding: 1.5rem 2rem; 
       border-radius: 20px; 
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      overflow: hidden;
     }
     
     .logo-container { text-align: center; margin-bottom: 0.3rem; flex-shrink: 0; }
-    .logo-img { max-width: 180px; width: 50%; height: auto; filter: drop-shadow(0 0 12px var(--neon-pink-glow)); }
+    .logo-img { max-width: 160px; width: 45%; height: auto; filter: drop-shadow(0 0 12px var(--neon-pink-glow)); }
     body.host-mode .logo-img { max-width: 260px; height: 50px; }
 
-    h1, h2, h3 { color: #fff; margin-bottom: 0.4rem; text-align: center; }
+    h1, h2, h3 { color: #fff; margin-bottom: 0.3rem; text-align: center; }
     .neon-text { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink-glow); }
 
     input, button { width: 100%; padding: 0.7rem; margin: 0.2rem 0; border-radius: 8px; font-size: 0.95rem; }
@@ -77,13 +84,13 @@
     .hidden { display: none !important; }
     
     /* Mobilní formuláře a zobrazení */
-    .mobile-view-box { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; flex-grow: 1; justify-content: space-between; }
-    .players-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; margin-top: 0.3rem; overflow-y: auto; max-height: 38vh; padding-right: 2px; }
+    .mobile-view-box { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+    .players-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; margin-top: 0.3rem; overflow-y: auto; padding-right: 2px; }
     .players-grid input { margin: 0; font-size: 0.85rem; padding: 0.5rem; }
     .section-label { font-size: 0.85rem; color: #aaa; margin-top: 0.4rem; display: block; }
 
-    .cat-image-box { width: 100%; height: 100px; max-height: 15vh; border-radius: 10px; overflow: hidden; margin-bottom: 0.3rem; border: 1px solid #333; background-size: cover; background-position: center; flex-shrink: 0; }
-    body.host-mode .cat-image-box { height: 180px; max-height: none; border-radius: 12px; margin-bottom: 0.8rem; }
+    .cat-image-box { width: 100%; height: 90px; border-radius: 10px; overflow: hidden; margin-bottom: 0.3rem; border: 1px solid #333; background-size: cover; background-position: center; flex-shrink: 0; }
+    body.host-mode .cat-image-box { height: 180px; border-radius: 12px; margin-bottom: 0.8rem; }
 
     .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); }
     .btn-kick { background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 0; width: auto; box-shadow: none; }
@@ -110,6 +117,13 @@
       margin-bottom: 1rem;
       text-align: left;
     }
+
+    /* Pevné tlačítko dole pro mobilní otázky */
+    .submit-bar {
+      padding-top: 0.4rem;
+      flex-shrink: 0;
+      background: var(--card);
+    }
   </style>
 </head>
 <body>
@@ -133,7 +147,7 @@
 
   <!-- 1. REGISTRACE HRÁČE (MOBIL) -->
   <div id="view-register" class="hidden mobile-view-box">
-    <div style="overflow-y: auto;">
+    <div style="overflow-y: auto; flex: 1;">
       <h2 style="font-size:1.1rem;">📱 Připojení do Kvízu</h2>
       
       <label class="section-label">Název týmu *</label>
@@ -152,7 +166,9 @@
       </div>
     </div>
 
-    <button onclick="registerTeam()" style="margin-top: 0.5rem;">VSTOUPIT DO HRY</button>
+    <div class="submit-bar">
+      <button onclick="registerTeam()">VSTOUPIT DO HRY</button>
+    </div>
   </div>
 
   <!-- 2. HRÁČSKÉ ROZHRANÍ (MOBIL) -->
@@ -170,7 +186,11 @@
         <h3 id="player-q-text" style="margin-bottom:0.3rem; font-size: 0.9rem; line-height: 1.2;">-</h3>
         <div id="player-options"></div>
       </div>
-      <button id="player-submit-btn" disabled onclick="submitPlayerAnswer()" style="background: var(--green); color:#000; margin-top: 0.4rem; padding: 0.8rem; font-weight: bold; flex-shrink: 0;">POTVRDIT ODPOVĚĎ</button>
+      
+      <!-- SAMOSTATNÁ LIŠTA PRO TLAČÍTKO POD KOTVOU -->
+      <div class="submit-bar">
+        <button id="player-submit-btn" disabled onclick="submitPlayerAnswer()" style="background: var(--green); color:#000; padding: 0.8rem; font-weight: bold; margin: 0;">POTVRDIT ODPOVĚĎ</button>
+      </div>
     </div>
 
     <!-- BONUS QUEST SEZNAM HRÁČŮ -->
