@@ -20,15 +20,31 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     body { background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 1rem; min-height: 100vh; }
     
+    /* REŽIM HOST / PLÁTNO - Zamezení scrollbaru a responzivní přizpůsobení */
+    body.host-mode {
+      padding: 1vh 2vw;
+      height: 100vh;
+      overflow: hidden; /* Zakáže jakýkoliv scrollbar na plátně */
+    }
+    
     .container { width: 100%; max-width: 650px; background: var(--card); padding: 1.5rem; border-radius: 16px; border: 1px solid #22222a; box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; transition: all 0.3s ease; }
     
-    body.host-mode .container { max-width: 1200px; padding: 2.5rem; border-radius: 20px; }
+    body.host-mode .container { 
+      max-width: 95vw; 
+      height: 96vh;
+      padding: 1.5rem 2rem; 
+      border-radius: 20px; 
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      overflow: hidden;
+    }
     
-    .logo-container { text-align: center; margin-bottom: 1.5rem; }
+    .logo-container { text-align: center; margin-bottom: 1rem; }
     .logo-img { max-width: 280px; width: 80%; height: auto; filter: drop-shadow(0 0 12px var(--neon-pink-glow)); }
-    body.host-mode .logo-img { max-width: 380px; }
+    body.host-mode .logo-img { max-width: 260px; height: 50px; } /* Zmenšené logo pro plátno */
 
-    h1, h2, h3 { color: #fff; margin-bottom: 1rem; text-align: center; }
+    h1, h2, h3 { color: #fff; margin-bottom: 0.8rem; text-align: center; }
     .neon-text { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink-glow); }
 
     input, button { width: 100%; padding: 0.8rem; margin: 0.4rem 0; border-radius: 8px; font-size: 1rem; }
@@ -50,7 +66,7 @@
     .section-label { font-size: 0.9rem; color: #aaa; margin-top: 1rem; display: block; }
 
     .cat-image-box { width: 100%; height: 220px; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; border: 1px solid #333; background-size: cover; background-position: center; }
-    body.host-mode .cat-image-box { height: 350px; border-radius: 16px; }
+    body.host-mode .cat-image-box { height: 180px; border-radius: 12px; margin-bottom: 0.8rem; } /* Optimalizovaná výška obrázku */
 
     .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); }
     .btn-kick { background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 0; width: auto; box-shadow: none; }
@@ -58,13 +74,13 @@
     .btn-bonus { background: var(--green); color: #000; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer; margin: 0 0.2rem; width: auto; box-shadow: none; }
     .btn-bonus:hover { background: #00c494; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
     th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #222; }
-    body.host-mode th, body.host-mode td { font-size: 1.2rem; padding: 1rem; }
+    body.host-mode th, body.host-mode td { font-size: 1.1rem; padding: 0.4rem 0.8rem; } /* Kompaktnější řádky pro tabulku výsledků */
     th { color: var(--neon-pink); }
-    .icon-col { width: 40px; text-align: center; font-size: 1.2rem; }
+    .icon-col { width: 40px; text-align: center; font-size: 1.1rem; }
     
-    .rep-card { background: #181822; padding: 1.2rem; margin: 0.6rem 0; border-radius: 10px; border: 1px solid var(--neon-pink); font-size: 1.4rem; text-align: center; }
+    .rep-card { background: #181822; padding: 1rem; margin: 0.4rem 0; border-radius: 10px; border: 1px solid var(--neon-pink); font-size: 1.2rem; text-align: center; }
     
     .btn-launch-fs { background: #1c1c28; color: var(--green); border: 1px solid var(--green); font-size: 0.9rem; padding: 0.6rem; border-radius: 8px; margin-bottom: 1rem; cursor: pointer; text-transform: uppercase; font-weight: bold; }
     .btn-launch-fs:hover { background: #00f0b522; }
@@ -138,36 +154,36 @@
   <!-- 3. OBRAZOVKA PRO PLÁTNO / PROJEKTOR (PROJEKCE - ŠIROKOÚHLÁ) -->
   <div id="view-host" class="hidden">
     <div id="host-setup" style="text-align: center;">
-      <p style="margin-bottom:1rem; color:#aaa; font-size:1.2rem;">Naskenujte QR kód a připojte se do hry:</p>
-      <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:1.5rem; background:#fff; padding:12px; border-radius:12px; width:fit-content; margin-left:auto; margin-right:auto;"></div>
+      <p style="margin-bottom:0.8rem; color:#aaa; font-size:1.1rem;">Naskenujte QR kód a připojte se do hry:</p>
+      <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:1rem; background:#fff; padding:10px; border-radius:12px; width:fit-content; margin-left:auto; margin-right:auto;"></div>
       
-      <h3 style="font-size:1.5rem;">Připojené týmy:</h3>
-      <div id="connected-teams-list" style="text-align:left; margin:1rem 0;"></div>
+      <h3 style="font-size:1.3rem;">Připojené týmy:</h3>
+      <div id="connected-teams-list" style="text-align:left; margin:0.8rem 0; max-height: 40vh; overflow-y: auto;"></div>
     </div>
 
-    <div id="host-game" class="hidden">
+    <div id="host-game" class="hidden" style="display: flex; flex-direction: column; height: 100%;">
       <div id="host-cat-img" class="cat-image-box"></div>
 
-      <div style="display:flex; justify-content:space-between; margin-bottom:1rem; font-size: 1.2rem;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size: 1.1rem;">
         <span id="host-cat-num" style="color:var(--neon-pink); font-weight:bold;">-</span>
         <span id="host-votes-count" style="color:var(--green); font-weight:bold;">Odhlasováno: 0 / 0</span>
       </div>
 
       <!-- STANDARDNÍ OTÁZKA NA PLÁTNĚ -->
       <div id="host-standard-box">
-        <h2 id="host-q-text" style="font-size:2.2rem; margin:1.5rem 0; text-align:left; line-height: 1.3;">-</h2>
+        <h2 id="host-q-text" style="font-size:1.8rem; margin:0.8rem 0; text-align:left; line-height: 1.25;">-</h2>
       </div>
 
       <!-- ZOBRAZENÍ BONUSOVÉ HRY A ZÁSTUPCŮ NA PLÁTNĚ -->
       <div id="host-bonus-representatives" class="hidden">
-        <h1 class="neon-text" id="host-bonus-title-screen" style="font-size: 2.8rem; margin: 1rem 0;">🏆 BONUS GAME</h1>
-        <p style="text-align:center; color:#aaa; margin-bottom:1.5rem; font-size: 1.3rem;">Zástupci týmů, vyslaní na pódium:</p>
-        <div id="representatives-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;"></div>
+        <h1 class="neon-text" id="host-bonus-title-screen" style="font-size: 2.2rem; margin: 0.5rem 0;">🏆 BONUS GAME</h1>
+        <p style="text-align:center; color:#aaa; margin-bottom:1rem; font-size: 1.1rem;">Zástupci týmů, vyslaní na pódium:</p>
+        <div id="representatives-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem;"></div>
       </div>
 
       <div id="host-results-box" class="hidden">
-        <h3 id="host-correct-ans-container" style="color:var(--green); text-align:left; font-size: 1.6rem;">Správná odpověď: <span id="host-correct-ans"></span></h3>
-        <h3 style="margin-top:2rem; text-align:left; font-size: 1.5rem;">Průběžné Pořadí:</h3>
+        <h3 id="host-correct-ans-container" style="color:var(--green); text-align:left; font-size: 1.3rem; margin-bottom: 0.5rem;">Správná odpověď: <span id="host-correct-ans"></span></h3>
+        <h3 style="margin-top:0.8rem; text-align:left; font-size: 1.2rem;">Průběžné Pořadí:</h3>
         <table>
           <thead><tr><th class="icon-col"></th><th>#</th><th>Tým</th><th>Body</th></tr></thead>
           <tbody id="leaderboard-body"></tbody>
@@ -316,7 +332,7 @@
     db.ref('gameState').set({ status: 'WAITING', qIndex: -1 });
 
     const joinUrl = currentUrl.split('?')[0];
-    new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 200, height: 200 });
+    new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 160, height: 160 });
     listenHost();
   } else {
     if (myTeamKey) {
