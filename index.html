@@ -8,6 +8,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
+
     :root { 
       --bg: #0a0a0c; 
       --card: #141419; 
@@ -123,6 +125,56 @@
       flex-shrink: 0;
       background: var(--card);
     }
+
+    /* DETONÁTOR A ČASOVAČ PRO BONUS HRU */
+    .detonator-box {
+      background: #000000;
+      border: 4px solid #ff1100;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.6), inset 0 0 15px rgba(255, 0, 0, 0.4);
+      position: relative;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .detonator-box.exploded {
+      background: #ff0000 !important;
+      border-color: #ffffff !important;
+      box-shadow: 0 0 60px #ff0000, inset 0 0 30px #ffffff;
+      animation: flash-red 0.2s infinite alternate;
+    }
+
+    @keyframes flash-red {
+      from { background: #ff0000; }
+      to { background: #880000; }
+    }
+
+    .detonator-display {
+      font-family: 'Orbitron', monospace;
+      font-size: 4rem;
+      color: #ff0000;
+      text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+      letter-spacing: 4px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .detonator-box.exploded .detonator-display {
+      color: #ffffff;
+      text-shadow: 0 0 20px #ffffff;
+    }
+
+    .timer-btn-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+    }
+
+    .btn-timer-start { background: var(--green); color: #000; }
+    .btn-timer-stop { background: #ffaa00; color: #000; }
+    .btn-timer-reset { background: var(--red); color: #fff; }
   </style>
 </head>
 <body>
@@ -224,9 +276,17 @@
 
       <!-- ZOBRAZENÍ BONUSOVÉ HRY A ZÁSTUPCŮ NA PLÁTNĚ -->
       <div id="host-bonus-representatives" class="hidden">
-        <h1 class="neon-text" id="host-bonus-title-screen" style="font-size: 2.2rem; margin: 0.5rem 0;">🏆 BONUS GAME</h1>
-        <p style="text-align:center; color:#aaa; margin-bottom:1rem; font-size: 1.1rem;">Zástupci týmů, vyslaní na pódium:</p>
-        <div id="representatives-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem;"></div>
+        <h1 class="neon-text" id="host-bonus-title-screen" style="font-size: 2rem; margin: 0.3rem 0;">🏆 BONUS GAME</h1>
+        
+        <!-- DETONÁTOR TIMER PRO OBRAZOVKU -->
+        <div id="host-detonator-box" class="detonator-box">
+          <div style="color: #ff3333; font-size: 0.85rem; letter-spacing: 2px; margin-bottom: 0.2rem; font-weight: bold;">💣 BOMB DETONATOR TIMER 💣</div>
+          <div id="host-detonator-display" class="detonator-display">10.00</div>
+          <div id="host-detonator-msg" style="color: #fff; font-size: 1.2rem; margin-top: 0.3rem; font-weight: bold;" class="hidden">💥 BOOM! ČAS VYPRŠEL! 💥</div>
+        </div>
+
+        <p style="text-align:center; color:#aaa; margin-bottom:0.5rem; font-size: 1rem;">Zástupci týmů, vyslaní na pódium:</p>
+        <div id="representatives-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem;"></div>
       </div>
 
       <div id="host-results-box" class="hidden">
@@ -251,11 +311,22 @@
     <button class="btn-launch-fs" onclick="launchHostFullscreen()">🖥️ OTEVŘÍT PLÁTNO NA CELOU OBRAZOVKU</button>
 
     <!-- OVLÁDÁNÍ HRY -->
-    <div style="background: #111118; padding: 1.2rem; border-radius: 12px; border: 1px solid var(--neon-pink); margin-bottom: 1.5rem; text-align: center;">
+    <div style="background: #111118; padding: 1.2rem; border-radius: 12px; border: 1px solid var(--neon-pink); margin-bottom: 1rem; text-align: center;">
       <h3 style="color: var(--green); margin-bottom: 0.5rem;" id="admin-status-text">Stav hry: Čekání na spuštění</h3>
-      <p id="admin-votes-text" style="color: #aaa; font-size: 0.9rem; margin-bottom: 1rem;">Odhlasováno: 0 / 0</p>
+      <p id="admin-votes-text" style="color: #aaa; font-size: 0.9rem; margin-bottom: 0.8rem;">Odhlasováno: 0 / 0</p>
       
       <button id="admin-action-btn" onclick="handleHostAction()">SPUSTIT 1. OTÁZKU ►</button>
+    </div>
+
+    <!-- OVLÁDÁNÍ 10s DETONÁTORU PRO BONUS HRY -->
+    <div style="background: #180808; padding: 1rem; border-radius: 12px; border: 1px solid var(--red); margin-bottom: 1.5rem; text-align: center;">
+      <h3 style="color: var(--red); margin-bottom: 0.3rem;">💣 Ovládání Detonátoru (10 s Odpočet)</h3>
+      <div style="font-family: 'Orbitron', monospace; font-size: 2rem; color: var(--red); font-weight: bold;" id="admin-timer-display">10.00</div>
+      <div class="timer-btn-group">
+        <button class="btn-timer-start" onclick="controlTimer('START')">▶ START</button>
+        <button class="btn-timer-stop" onclick="controlTimer('STOP')">⏸ ZASTAVIT</button>
+        <button class="btn-timer-reset" onclick="controlTimer('RESET')">🔄 RESET (10s)</button>
+      </div>
     </div>
 
     <div style="margin-bottom:2rem;">
@@ -359,6 +430,11 @@
   let currentQIndex = -1;
   let hostStateMode = "START";
 
+  // ČASOVAČ PRO DETONÁTOR
+  let timerInterval = null;
+  let remainingTime = 10000; // MS (10.00 s)
+  let timerRunning = false;
+
   const currentUrl = window.location.href;
   const isHost = currentUrl.includes('mode=host');
   const isAdmin = currentUrl.includes('mode=admin');
@@ -377,6 +453,7 @@
     document.getElementById('view-admin').classList.remove('hidden');
     listenAdmin();
     listenHost();
+    listenTimer();
   } else if (isHost) {
     document.getElementById('view-host').classList.remove('hidden');
     document.getElementById('view-register').classList.add('hidden');
@@ -386,6 +463,7 @@
     const joinUrl = currentUrl.split('?')[0];
     new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 160, height: 160 });
     listenHost();
+    listenTimer();
   } else {
     if (myTeamKey) {
       db.ref(`teams/${myTeamKey}`).once('value', snapshot => {
@@ -628,6 +706,66 @@
     });
   }
 
+  // LOGIKA ČASOVAČE DETONÁTORU
+  function controlTimer(action) {
+    if (action === 'START') {
+      db.ref('timerState').set({ running: true, startTime: Date.now(), timeRemaining: remainingTime });
+    } else if (action === 'STOP') {
+      db.ref('timerState/running').set(false);
+    } else if (action === 'RESET') {
+      db.ref('timerState').set({ running: false, timeRemaining: 10000 });
+    }
+  }
+
+  function listenTimer() {
+    db.ref('timerState').on('value', snapshot => {
+      const data = snapshot.val() || { running: false, timeRemaining: 10000 };
+      
+      clearInterval(timerInterval);
+      
+      if (data.running) {
+        const start = data.startTime;
+        const initialRem = data.timeRemaining;
+        
+        timerInterval = setInterval(() => {
+          const elapsed = Date.now() - start;
+          const currentRem = Math.max(0, initialRem - elapsed);
+          updateTimerUI(currentRem);
+          
+          if (currentRem <= 0) {
+            clearInterval(timerInterval);
+          }
+        }, 30);
+      } else {
+        remainingTime = data.timeRemaining !== undefined ? data.timeRemaining : 10000;
+        updateTimerUI(remainingTime);
+      }
+    });
+  }
+
+  function updateTimerUI(ms) {
+    remainingTime = ms;
+    const sec = (ms / 1000).toFixed(2);
+    
+    if (document.getElementById('admin-timer-display')) {
+      document.getElementById('admin-timer-display').innerText = sec;
+    }
+    
+    const hostDisplay = document.getElementById('host-detonator-display');
+    const hostBox = document.getElementById('host-detonator-box');
+    const hostMsg = document.getElementById('host-detonator-msg');
+
+    if (hostDisplay) hostDisplay.innerText = sec;
+
+    if (ms <= 0) {
+      if (hostBox) hostBox.classList.add('exploded');
+      if (hostMsg) hostMsg.classList.remove('hidden');
+    } else {
+      if (hostBox) hostBox.classList.remove('exploded');
+      if (hostMsg) hostMsg.classList.add('hidden');
+    }
+  }
+
   function handleHostAction() {
     if (hostStateMode === "START" || hostStateMode === "NEXT") {
       startNextQuestionHost();
@@ -645,6 +783,9 @@
       renderFinalLeaderboard();
       return;
     }
+
+    // Resetovat časovač při přechodu na další otázku
+    controlTimer('RESET');
 
     db.ref('teams').once('value', snapshot => {
       const teams = snapshot.val() || {};
