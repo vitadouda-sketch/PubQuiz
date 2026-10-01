@@ -235,7 +235,7 @@
           <h3 style="color:var(--green); text-align:left; font-size: 1.3rem; margin: 0;">Správná odpověď: <span id="host-correct-ans"></span></h3>
         </div>
 
-        <h3 style="margin-top:0.5rem; text-align:left; font-size: 1.2rem;">Průběžné Pořadí:</h3>
+        <h3 id="leaderboard-title" style="margin-top:0.5rem; text-align:left; font-size: 1.2rem;">Průběžné Pořadí:</h3>
         <table>
           <thead><tr><th class="icon-col"></th><th>#</th><th>Tým</th><th>Body</th></tr></thead>
           <tbody id="leaderboard-body"></tbody>
@@ -279,13 +279,17 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
+  // SVG Obrázek pro Hobby Horsing
   const hobbyHorsingSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%"><rect width="100%" height="100%" fill="%230e0e14"/><g stroke="%23ff007f" stroke-width="4" fill="none"><line x1="320" y1="280" x2="480" y2="280" stroke="%2300f0b5" stroke-width="12" stroke-linecap="round"/><line x1="320" y1="320" x2="480" y2="320" stroke="%2300f0b5" stroke-width="12" stroke-linecap="round"/><line x1="330" y1="360" x2="330" y2="240" stroke="%23ff007f" stroke-width="8"/><line x1="470" y1="360" x2="470" y2="240" stroke="%23ff007f" stroke-width="8"/><path d="M 280 230 C 310 170, 360 120, 410 130 C 440 135, 470 160, 480 200" stroke="%23ff007f" stroke-width="10" stroke-linecap="round"/><circle cx="410" cy="100" r="18" fill="%23ff007f"/><path d="M 370 190 L 350 250 L 390 260" stroke="%23ff007f" stroke-width="8"/><path d="M 430 180 L 460 230 L 490 220" stroke="%23ff007f" stroke-width="8"/><path d="M 450 140 L 520 100" stroke="%2300f0b5" stroke-width="10" stroke-linecap="round"/><path d="M 520 100 C 540 80, 560 90, 550 110 C 540 120, 510 125, 495 125 Z" fill="%2300f0b5"/><circle cx="535" cy="95" r="4" fill="%230a0a0c"/><path d="M 500 120 L 470 150" stroke="%2300f0b5" stroke-width="4"/><path d="M 515 130 C 480 160, 440 170, 410 165" stroke="%23ff007f" stroke-dasharray="6,6" stroke-width="3"/></g><text x="50%" y="50" font-family="'Segoe UI', sans-serif" font-weight="900" font-size="28" fill="%2300f0b5" text-anchor="middle" letter-spacing="2">HOBBY HORSING JUMP</text></svg>`;
+
+  // SVG Obrázek pro Pokémony
+  const pokemonSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%"><rect width="100%" height="100%" fill="%230e0e14"/><g transform="translate(400,200)"><circle cx="0" cy="0" r="110" fill="%23111"/><path d="M -100 0 A 100 100 0 0 1 100 0 Z" fill="%23ff0055"/><path d="M -100 0 A 100 100 0 0 0 100 0 Z" fill="%23ffffff"/><line x1="-100" y1="0" x2="100" y2="0" stroke="%23111" stroke-width="16"/><circle cx="0" cy="0" r="32" fill="%23111"/><circle cx="0" cy="0" r="20" fill="%23ffffff"/><circle cx="-180" cy="-40" r="6" fill="%23ff007f"/><circle cx="180" cy="-40" r="6" fill="%23ff007f"/><path d="M -220 -80 L -180 -20 L -210 20 Z" fill="%23ff007f"/><path d="M 220 -80 L 180 -20 L 210 20 Z" fill="%23ff007f"/></g><text x="50%" y="60" font-family="'Segoe UI', sans-serif" font-weight="900" font-size="32" fill="%2300f0b5" text-anchor="middle" letter-spacing="3">LÉK NEBO POKÉMON?</text></svg>`;
 
   const categoryImages = {
     "Sci-Fi": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop",
     "Sport": hobbyHorsingSvg,
     "Videohry": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=600&auto=format&fit=crop",
-    "Lék nebo Pokémon?": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop",
+    "Lék nebo Pokémon?": pokemonSvg,
     "Fantasy": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop"
   };
 
@@ -310,10 +314,10 @@
     { cat: "Sport", q: "Jaký je nejvyšší možný nához, kterého může hráč šipek dosáhnout v jednom kole 3 šipkami?", opts: ["150", "180", "200", "300"], correct: 1 },
     { cat: "Sport", q: "Ve kterém zimním sportu hráči zametají košťaty led před klouzajícím kamenem?", opts: ["Boby", "Skeleton", "Curling", "Krasobruslení"], correct: 2 },
     { cat: "Sport", q: "Na kopci Cooper´s Hill se každoročně pořádá bizardní závod v čem spočívá:", opts: ["Koulení sýra", "Hod barelem", "Běh s manželkou", "Skok do bláta"], correct: 0 },
-    { cat: "Sport", q: "Kolik trestných kol musí biatlonista absolvovat za každý netrefený terč v závodě?", opts: ["2 kola (300m)", "1 kolo (150m)", "Žádné, dostane jen časovou penalizaci", "1 kolo (300m)"], correct: 1 },
+    { cat: "Sport", q: "Kolik trestných kol a o jaké délce musí biatlonista absolvovat za každý netrefený terč ve sprintu?", opts: ["1 kolo (100m)", "1 kolo (150m)", "1 kolo (200m)", "2 kola (150m)"], correct: 1 },
     { cat: "Sport", q: "Jak se jmenuje nejprestižnější individuální fotbalové ocenění pořádané časopisem France Football?", opts: ["Zlatá kopačka", "FIFA World Player", "UEFA Cup", "Zlatý míč"], correct: 3 },
     { cat: "Sport", q: "Jaká je přesná vzdálenost od odhodové čáry k terči u oficiálních soutěžních šipek?", opts: ["2,18 m", "2,37 m", "2,43 m", "2,51 m"], correct: 1 },
-    { cat: "Sport", q: "Který brazilský fotbalista je jako jediný hráč v historii držitelem tří titulů mistra světa (1958, 1962, 1970)?", opts: ["Ronaldo", "Romário", "Pelé", "Ronaldinho"], correct: 2 },
+    { cat: "Sport", q: "Který fotbalista je jako jediný hráč v historii držitelem tří titulů mistra světa?", opts: ["Ronaldo", "Romário", "Pelé", "Ronaldinho"], correct: 2 },
     { cat: "Sport", q: "BONUS QUEST: Hobby Horsing (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "Hobby Horsing" },
 
     // --- VIDEOHRY (10 + 1 Bonus) ---
@@ -327,7 +331,7 @@
     { cat: "Videohry", q: "Která ze šampionek v League of Legends je známa jako pirátská kapitánka s dvěma pistolemi z města Bilgewater?", opts: ["Sarah Fortune", "Caitlyn", "Jinx", "Sivir"], correct: 0 },
     { cat: "Videohry", q: "Ve které české hře se objevila hláška: 'Jsem obyčejnej kluk. Kluci mi říkaj Rambo a holky kreténe'?", opts: ["Horké léto", "Polda", "Večerníček", "Gorky 17"], correct: 0 },
     { cat: "Videohry", q: "Jak se v sérii StarCraft nazývá gigantický psionický organismus, který sloužil jako centrální mozek Zergů?", opts: ["Ultralisk", "Overmind", "Kerrigan", "Cerebrate"], correct: 1 },
-    { cat: "Videohry", q: "BONUS QUEST: TBD (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "TBD" },
+    { cat: "Videohry", q: "BONUS QUEST: Kdo si hraje, zlobí! (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "Kdo si hraje, zlobí!" },
 
     // --- LÉK NEBO POKÉMON? (10 + 1 Bonus) ---
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je ATARAX skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
@@ -348,11 +352,11 @@
     { cat: "Fantasy", q: "Ve světě Harryho Pottera vyučuje létání na koštěti a působí jako rozhodčí pro famfrpál profesorka:", opts: ["Madam Hoochová", "Profesorka McGonagallová", "Madam Pomfreyová", "Profesorka Prýtová"], correct: 0 },
     { cat: "Fantasy", q: "Kolik trpaslíků se v knize Hobit vydalo pod vedením Thorina Pavézy na výpravu k Osamělé hoře?", opts: ["10", "12", "13", "15"], correct: 2 },
     { cat: "Fantasy", q: "Jak se v Pratchettově Úžasné Zeměploše jmenuje Smrťův kůň, který je zcela živý a bílý?", opts: ["Vraník", "Trnka", "Smrťák", "Blesk"], correct: 1 },
-    { cat: "Fantasy", q: "Ve světě Zaklínače se osudová dívka Ciri celým jménem nazývá Cirilla Fiona Elen Riannon. Ze kterého království pocházela?", opts: ["Temerie", "Cintra", "Redanie", "Aedirn"], correct: 1 },
+    { cat: "Fantasy", q: "Ve světě Zaklínače se osudová dívka Ciri celým jnémem nazývá Cirilla Fiona Elen Riannon. Ze kterého království pocházela?", opts: ["Temerie", "Cintra", "Redanie", "Aedirn"], correct: 1 },
     { cat: "Fantasy", q: "Které zakleté stvoření strážící vchod do podzemní říše Moria napadlo Společenstvo u brány?", opts: ["Balrog", "Skřetí král", "Strážce ve vodě", "Kraken"], correct: 2 },
-    { cat: "Fantasy", q: "Z jakého kovu je vyrobena čepel ocelového meče a jaká vrstva pokrývá stříbrný meč zaklínače?", opts: ["Ocelový je ze železa/meteoritu; stříbrný má ocelové jádro se stříbrným plátováním", "Oba jsou z čirého stříbra", "Ocelový je z titanu; stříbrný ze zlata", "Oba meče jsou vyrobeny z mitrilu"], correct: 0 },
+    { cat: "Fantasy", q: "Jakými čepelemi disponuje zaklínač Geralt a z jakých materiálů jsou vyrobeny?", opts: ["Ocelový je ze železa/meteoritu; stříbrný má ocelové jádro se stříbrným plátováním", "Oba jsou z čirého stříbra", "Ocelový je z titanu; stříbrný ze zlata", "Oba meče jsou vyrobeny z mitrilu"], correct: 0 },
     { cat: "Fantasy", q: "Která čarodějka se známou vůní šeříku a angreštu je životní láskou zaklínače Geralta z Rivie?", opts: ["Triss Merigold", "Fringilla Vigo", "Yennefer z Vengerbergu", "Keira Metz"], correct: 2 },
-    { cat: "Fantasy", q: "Který hobit našel Jeden prsten v řece předtím, než ho o něj Sméagol (Glum) připravil?", opts: ["Bungo", "Tobias", "Samvěd", "Déagol"], correct: 3 },
+    { cat: "Fantasy", q: "Která postava našla Jeden prsten v řece předtím, než ho o něj Sméagol (Glum) připravil?", opts: ["Bungo", "Tobias", "Isildur", "Déagol"], correct: 3 },
     { cat: "Fantasy", q: "BONUS QUEST: Deskoffky poetry (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "Deskoffky poetry" }
   ];
 
@@ -448,6 +452,8 @@
       if (state.status === 'QUESTION') {
         currentQIndex = state.qIndex;
         const qData = questions[currentQIndex];
+
+        const catImgUrl = categoryImages[qData ? qData.cat : ""] || "";
         
         if (qData && qData.isBonus) {
           document.getElementById('player-status-msg').classList.add('hidden');
@@ -476,8 +482,7 @@
           document.getElementById('player-question-box').classList.remove('hidden');
           document.getElementById('player-q-text').innerText = qData.q;
           
-          const catImgUrl = categoryImages[qData.cat] || "";
-          document.getElementById('player-cat-img').style.backgroundImage = `url('${catImgUrl}')`;
+          document.getElementById('player-cat-img').style.backgroundImage = `url("${catImgUrl}")`;
 
           const optsContainer = document.getElementById('player-options');
           optsContainer.innerHTML = '';
@@ -489,11 +494,11 @@
             optsContainer.innerHTML += `<button class="opt-btn" onclick="selectOpt(this, ${idx})">${opt}</button>`;
           });
         }
-      } else if (state.status === 'RESULTS') {
+      } else if (state.status === 'RESULTS' || state.status === 'FINISHED') {
         document.getElementById('player-bonus-box').classList.add('hidden');
         document.getElementById('player-question-box').classList.add('hidden');
         document.getElementById('player-status-msg').classList.remove('hidden');
-        document.getElementById('player-status-msg').innerHTML = " Vyhodnoceno! Podívejte se na projektor.";
+        document.getElementById('player-status-msg').innerHTML = state.status === 'FINISHED' ? "🏆 Konec hry! Sledujte finální celkové výsledky na projektoru." : " Vyhodnoceno! Podívejte se na projektor.";
       } else {
         document.getElementById('player-bonus-box').classList.add('hidden');
         document.getElementById('player-question-box').classList.add('hidden');
@@ -594,7 +599,7 @@
 
         if (qData) {
           const catImgUrl = categoryImages[qData.cat] || "";
-          if(document.getElementById('host-cat-img')) document.getElementById('host-cat-img').style.backgroundImage = `url('${catImgUrl}')`;
+          if(document.getElementById('host-cat-img')) document.getElementById('host-cat-img').style.backgroundImage = `url("${catImgUrl}")`;
         }
       } else if (state.status === 'RESULTS') {
         const qData = questions[currentQIndex];
@@ -609,7 +614,22 @@
         } else {
           if(document.getElementById('host-correct-ans-container')) document.getElementById('host-correct-ans-container').classList.add('hidden');
         }
+        if (document.getElementById('leaderboard-title')) document.getElementById('leaderboard-title').innerText = "Průběžné Pořadí:";
         renderLeaderboard();
+      } else if (state.status === 'FINISHED') {
+        if(document.getElementById('host-setup')) document.getElementById('host-setup').classList.add('hidden');
+        if(document.getElementById('host-game')) document.getElementById('host-game').classList.remove('hidden');
+        if(document.getElementById('host-bonus-representatives')) document.getElementById('host-bonus-representatives').classList.add('hidden');
+        if(document.getElementById('host-standard-box')) document.getElementById('host-standard-box').classList.add('hidden');
+        if(document.getElementById('host-correct-ans-container')) document.getElementById('host-correct-ans-container').classList.add('hidden');
+        if(document.getElementById('host-results-box')) document.getElementById('host-results-box').classList.remove('hidden');
+        
+        if (document.getElementById('leaderboard-title')) {
+          document.getElementById('leaderboard-title').innerText = "🏆 FINÁLNÍ VYHODNOCENÍ HRY";
+          document.getElementById('leaderboard-title').className = "neon-text";
+          document.getElementById('leaderboard-title').style.fontSize = "2rem";
+        }
+        renderFinalLeaderboard();
       }
     });
   }
@@ -627,7 +647,7 @@
     
     if (currentQIndex >= questions.length) {
       db.ref('gameState').set({ status: 'FINISHED' });
-      alert("Konec kvízu! Zobrazujeme celkové vítěze.");
+      alert("Konec kvízu! Zobrazujeme finální vyhodnocení.");
       renderFinalLeaderboard();
       return;
     }
@@ -716,16 +736,16 @@
       if(document.getElementById('leaderboard-body')) {
         document.getElementById('leaderboard-body').innerHTML = sorted.map((t, i) => {
           let medalIcon = "";
-          if (i === 0) medalIcon = "🏆";
+          if (i === 0) medalIcon = "🥇";
           else if (i === 1) medalIcon = "🥈";
           else if (i === 2) medalIcon = "🥉";
 
           return `
-            <tr>
+            <tr style="${i === 0 ? 'background: rgba(255,215,0,0.15); font-size:1.3rem;' : ''}">
               <td class="icon-col">${medalIcon}</td>
               <td>#${i+1}</td>
               <td><strong>${t.name}</strong></td>
-              <td>${t.score} b.</td>
+              <td><strong>${t.score} b.</strong></td>
             </tr>
           `;
         }).join('');
