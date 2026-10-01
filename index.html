@@ -89,7 +89,7 @@
     .players-grid input { margin: 0; font-size: 0.85rem; padding: 0.5rem; }
     .section-label { font-size: 0.85rem; color: #aaa; margin-top: 0.4rem; display: block; }
 
-    .cat-image-box { width: 100%; height: 90px; border-radius: 10px; overflow: hidden; margin-bottom: 0.3rem; border: 1px solid #333; background-size: cover; background-position: center; flex-shrink: 0; }
+    .cat-image-box { width: 100%; height: 90px; border-radius: 10px; overflow: hidden; margin-bottom: 0.3rem; border: 1px solid #333; background-size: cover; background-position: center; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     body.host-mode .cat-image-box { height: 180px; border-radius: 12px; margin-bottom: 0.8rem; }
 
     .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); }
@@ -118,7 +118,6 @@
       text-align: left;
     }
 
-    /* Pevné tlačítko dole pro mobilní otázky */
     .submit-bar {
       padding-top: 0.4rem;
       flex-shrink: 0;
@@ -187,7 +186,6 @@
         <div id="player-options"></div>
       </div>
       
-      <!-- SAMOSTATNÁ LIŠTA PRO TLAČÍTKO POD KOTVOU -->
       <div class="submit-bar">
         <button id="player-submit-btn" disabled onclick="submitPlayerAnswer()" style="background: var(--green); color:#000; padding: 0.8rem; font-weight: bold; margin: 0;">POTVRDIT ODPOVĚĎ</button>
       </div>
@@ -281,9 +279,12 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
+  // SVG Obrázek pro Hobby Horsing ve Sportu (ve formátu Data URI)
+  const hobbyHorsingSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%"><rect width="100%" height="100%" fill="%230e0e14"/><g stroke="%23ff007f" stroke-width="4" fill="none"><line x1="320" y1="280" x2="480" y2="280" stroke="%2300f0b5" stroke-width="12" stroke-linecap="round"/><line x1="320" y1="320" x2="480" y2="320" stroke="%2300f0b5" stroke-width="12" stroke-linecap="round"/><line x1="330" y1="360" x2="330" y2="240" stroke="%23ff007f" stroke-width="8"/><line x1="470" y1="360" x2="470" y2="240" stroke="%23ff007f" stroke-width="8"/><path d="M 280 230 C 310 170, 360 120, 410 130 C 440 135, 470 160, 480 200" stroke="%23ff007f" stroke-width="10" stroke-linecap="round"/><circle cx="410" cy="100" r="18" fill="%23ff007f"/><path d="M 370 190 L 350 250 L 390 260" stroke="%23ff007f" stroke-width="8"/><path d="M 430 180 L 460 230 L 490 220" stroke="%23ff007f" stroke-width="8"/><path d="M 450 140 L 520 100" stroke="%2300f0b5" stroke-width="10" stroke-linecap="round"/><path d="M 520 100 C 540 80, 560 90, 550 110 C 540 120, 510 125, 495 125 Z" fill="%2300f0b5"/><circle cx="535" cy="95" r="4" fill="%230a0a0c"/><path d="M 500 120 L 470 150" stroke="%2300f0b5" stroke-width="4"/><path d="M 515 130 C 480 160, 440 170, 410 165" stroke="%23ff007f" stroke-dasharray="6,6" stroke-width="3"/></g><text x="50%" y="50" font-family="'Segoe UI', sans-serif" font-weight="900" font-size="28" fill="%2300f0b5" text-anchor="middle" letter-spacing="2">HOBBY HORSING JUMP</text></svg>`;
+
   const categoryImages = {
     "Sci-Fi": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop",
-    "Sport": "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?q=80&w=600&auto=format&fit=crop",
+    "Sport": hobbyHorsingSvg,
     "Videohry": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=600&auto=format&fit=crop",
     "Lék nebo Pokémon?": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop",
     "Fantasy": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop"
@@ -291,13 +292,13 @@
 
   const questions = [
     // --- SCI-FI (10 + 1 Bonus) ---
-    { cat: "Sci-Fi", q: "Z jakého materiálu je tělo mimozemšťana Rockyho v románu Projekt Spasitel?", opts: ["Ocel", "Křemík", "Titan", "Uhlík"], correct: 1 },
+    { cat: "Sci-Fi", q: "Která nebezpečná chemická látka tvoří základ krevního oběhu mimozemšťana Rockyho v románu Spasitel od Andyho Weira?", opts: ["Kyselina sírová", "Rtuť", "Tekutý amoniak", "Brom"], correct: 1 },
     { cat: "Sci-Fi", q: "V románu Duna od Franka Herberta je planeta Arrakis jediným zdrojem koreření. Který tvor je klíčový pro jeho vznik?", opts: ["Obří škorpión", "Pouštní liška", "Písečný červ", "Létající ještěr"], correct: 2 },
     { cat: "Sci-Fi", q: "Ve Stopařově průvodci po Galaxii se počítala odpověď na otázku života, vesmíru a vůbec. Jak se jmoval superpočítač?", opts: ["HAL 9000", "Multivac", "Skynet", "Hlubina Mysli (Deep Thought)"], correct: 3 },
     { cat: "Sci-Fi", q: "Která planeta byla zničena první Hvězdou smrti ve filmu Star Wars: Epizoda IV?", opts: ["Tatooine", "Alderaan", "Endor", "Coruscant"], correct: 1 },
     { cat: "Sci-Fi", q: "Jaký test se ve filmu Blade Runner používá k odhalení replikantů měřením reakcí zornic?", opts: ["Voight-Kampffův test", "Turingův test", "Voight-Rassmussenův test", "Deckardův test"], correct: 0 },
     { cat: "Sci-Fi", q: "Jak se jmenuje loď hlavních hrdinů pod vedením Jamese Holdena ve sérii The Expanse?", opts: ["Canterbury", "Enterprise", "Rocinante", "Serenity"], correct: 2 },
-    { cat: "Sci-Fi", q: "Jak se jmenuje mikroskopický organismus v Projektu Spasitel, který pohlcuje energii Slunce?", opts: ["Chrono-vir", "Solaris", "Proton", "Astrofág"], correct: 3 },
+    { cat: "Sci-Fi", q: "Jak se jmenuje mikroskopický organismus v románu Spasitel, který pohlcuje energii Slunce?", opts: ["Chrono-vir", "Solaris", "Proton", "Astrofág"], correct: 3 },
     { cat: "Sci-Fi", q: "Kdo napsal klasický sci-fi román Já, robot a formuloval Tři zákony robotiky?", opts: ["Arthur C. Clarke", "Isaac Asimov", "Philip K. Dick", "Stanisław Lem"], correct: 1 },
     { cat: "Sci-Fi", q: "Jakou barvu měla pilulka, kterou v Matrixu nabídl Morpheus Neovi, aby poznal pravdu?", opts: ["Modrá", "Zelená", "Červená", "Žlutá"], correct: 2 },
     { cat: "Sci-Fi", q: "Jak se v románu Duna nazývá obří tajný řád ženských adeptek?", opts: ["Bene Gesserit", "Bene Tleilax", "Sardaukar", "Honored Matres"], correct: 0 },
@@ -309,10 +310,10 @@
     { cat: "Sport", q: "Jak se jmenuje bizarní sport kombinující střídání kol deskové hry na šachovnici a souboje v ringu?", opts: ["Ring šach", "Kombat Mat", "Punch Chess", "Šachový box"], correct: 3 },
     { cat: "Sport", q: "Jaký je nejvyšší možný nához, kterého může hráč šipek dosáhnout v jednom kole 3 šipkami?", opts: ["150", "180", "200", "300"], correct: 1 },
     { cat: "Sport", q: "Ve kterém zimním sportu hráči zametají košťaty led před klouzajícím kamenem?", opts: ["Boby", "Skeleton", "Curling", "Krasobruslení"], correct: 2 },
-    { cat: "Sport", q: "Jak se nazývá bizarní anglická soutěž na kopci Cooper's Hill, kde se běhá ze strmého svahu za běžícím objektu?", opts: ["Koulení sýra", "Hod barelem", "Běh s manželkou", "Skok do bláta"], correct: 0 },
+    { cat: "Sport", q: "Při které tradiční soutěži na kopci Cooper's Hill v Anglii účastníci riskují zranění při stíhání strmě se kátlejícího objektu?", opts: ["Koulení sýra", "Hod barelem", "Běh s manželkou", "Skok do bláta"], correct: 0 },
     { cat: "Sport", q: "Kolik trestných kol musí biatlonista absolvovat za každý netrefený terč v závodě?", opts: ["2 kola (300m)", "1 kolo (150m)", "Žádné, dostane jen časovou penalizaci", "1 kolo (300m)"], correct: 1 },
     { cat: "Sport", q: "Jak se jmenuje nejprestižnější individuální fotbalové ocenění pořádané časopisem France Football?", opts: ["Zlatá kopačka", "FIFA World Player", "UEFA Cup", "Zlatý míč"], correct: 3 },
-    { cat: "Sport", q: "Jaká je přesná vzdálenost od odhodové čáry k terči u oficiálních soutěžních šipek?", opts: ["2,15 m", "2,37 m", "2,50 m", "3,00 m"], correct: 1 },
+    { cat: "Sport", q: "Jaká je přesná vzdálenost od odhodové čáry k terči u oficiálních soutěžních šipek?", opts: ["2,18 m", "2,37 m", "2,43 m", "2,51 m"], correct: 1 },
     { cat: "Sport", q: "Který brazilský fotbalista je jako jediný hráč v historii držitelem tří titulů mistra světa (1958, 1962, 1970)?", opts: ["Ronaldo", "Romário", "Pelé", "Ronaldinho"], correct: 2 },
     { cat: "Sport", q: "BONUS QUEST: Hobby Horsing (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "Hobby Horsing" },
 
@@ -324,8 +325,8 @@
     { cat: "Videohry", q: "Jak se jmenuje šílená sarkastická AI počítačová entita, která vás provází hrou Portal?", opts: ["SHODAN", "HAL 9000", "GLaDOS", "AM"], correct: 2 },
     { cat: "Videohry", q: "Jak se jmenuje meč paladina Arthase ze hry Warcraft III, který ho proměnil v Lich Kinga?", opts: ["Ashbringer", "Shadowmourne", "Thunderfury", "Frostmourne"], correct: 3 },
     { cat: "Videohry", q: "Ve hře Diablo II se v tajné úrovni (Secret Level) vytvořené v kostce s Wirtovou nohou vyskytují jaká stvoření?", opts: ["Prasata s meči", "Bojové krávy", "Kostlivci", "Draci"], correct: 1 },
-    { cat: "Videohry", q: "Která ze šampionek v League of Legends je známa jako pirátská kapitánka s dvěma pistolemi z města Bilgewater?", opts: ["Sarah Fortune (Miss Fortune)", "Caitlyn", "Jinx", "Sivir"], correct: 0 },
-    { cat: "Videohry", q: "Ve které české kultovní logické hře vystupuje postavička panáčka v beranici jnémem Pinda?", opts: ["Polda", "Večerníček", "Fishfillets", "Brány Skeldalu"], correct: 2 },
+    { cat: "Videohry", q: "Která ze šampionek v League of Legends je známa jako pirátská kapitánka s dvěma pistolemi z města Bilgewater?", opts: ["Sarah Fortune", "Caitlyn", "Jinx", "Sivir"], correct: 0 },
+    { cat: "Videohry", q: "Ve které české hře se objevila hláška: 'Jsem obyčejnej kluk. Kluci mi říkaj Rambo a holky kreténe'?", opts: ["Horké léto", "Polda", "Večerníček", "Gorky 17"], correct: 0 },
     { cat: "Videohry", q: "Jak se v sérii StarCraft nazývá gigantický psionický organismus, který sloužil jako centrální mozek Zergů?", opts: ["Ultralisk", "Overmind", "Kerrigan", "Cerebrate"], correct: 1 },
     { cat: "Videohry", q: "BONUS QUEST: TBD (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "TBD" },
 
@@ -337,8 +338,8 @@
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je SKELAXIN skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je VENTOLIN skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je CELEBI skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
-    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je AMOKSIKLAV skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
-    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je MAGBY skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je CYMBALTA skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
+    { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je LANTURN skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 1 },
     { cat: "Lék nebo Pokémon?", q: "Rozhodněte: Je CLARITINE skutečný lék, nebo Pokémon?", opts: ["Skutečný lék", "Pokémon"], correct: 0 },
     { cat: "Lék nebo Pokémon?", q: "BONUS QUEST: Pokemonovaná (Vyberte zástupce na pódium)", opts: ["I.", "II.", "III.", "IV."], correct: 0, isBonus: true, bonusName: "Pokemonovaná" },
 
@@ -346,7 +347,7 @@
     { cat: "Fantasy", q: "V Úžasné Zeměploše od Terryho Pratchetta leží město Ankh-Morpork. Kdo je jeho obávaným i respektovaným Vládcem (Patricijem)?", opts: ["Mrakoplaš", "Havelock Vetinari", "Nobby Nobbs", "Samuel Elánius"], correct: 1 },
     { cat: "Fantasy", q: "V sérii Zaklínač se Geralt učil zaklínačskému řemeslu na starobylé horské pevnosti Školy Vlka. Jak se jmoveje?", opts: ["Novigrad", "Vizima", "Oxenfurt", "Kaer Morhen"], correct: 3 },
     { cat: "Fantasy", q: "Ve světě Harryho Pottera vyučuje létání na koštěti a působí jako rozhodčí pro famfrpál profesorka:", opts: ["Madam Hoochová", "Profesorka McGonagallová", "Madam Pomfreyová", "Profesorka Prýtová"], correct: 0 },
-    { cat: "Fantasy", q: "V Pánovi prstenů tvoří Společenstvo Prstenu celkem 9 členů. Kolik z nich bylo zástupců rasy hobitů?", opts: ["2", "6", "4", "8"], correct: 2 },
+    { cat: "Fantasy", q: "Kolik trpaslíků se v knize Hobit vydalo pod vedením Thorina Pavézy na výpravu k Osamělé hoře?", opts: ["10", "12", "13", "15"], correct: 2 },
     { cat: "Fantasy", q: "Jak se v Pratchettově Úžasné Zeměploše jmenuje Smrťův kůň, který je zcela živý a bílý?", opts: ["Vraník", "Trnka", "Smrťák", "Blesk"], correct: 1 },
     { cat: "Fantasy", q: "Ve světě Zaklínače se osudová dívka Ciri celým jnémem nazývá Cirilla Fiona Elen Riannon. Ze kterého království pocházela?", opts: ["Temerie", "Cintra", "Redanie", "Aedirn"], correct: 1 },
     { cat: "Fantasy", q: "Které zakleté stvoření strážící vchod do podzemní říše Moria napadlo Společenstvo u brány?", opts: ["Balrog", "Skřetí král", "Strážce ve vodě", "Kraken"], correct: 2 },
@@ -757,7 +758,7 @@
           const t = teams[k];
           return `<div class="team-item">
                     <div>🟢 <strong>${t.name}</strong></div>
-                    <button class="btn-kick" onclick="deleteTeam('${k}')">🗑️ Smazat Tým</button>
+                    <button class="btn-kick" onclick="deleteTeam('${k}')">🗑️️ Smazat Tým</button>
                   </div>`;
         }).join('');
       }
