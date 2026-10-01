@@ -288,8 +288,8 @@
       <div id="host-bonus-representatives" class="hidden">
         <h1 class="neon-text" id="host-bonus-title-screen" style="font-size: 2rem; margin: 0.3rem 0;">🏆 BONUS GAME</h1>
         
-        <!-- DETONÁTOR TIMER PRO OBRAZOVKU -->
-        <div id="host-detonator-box" class="detonator-box">
+        <!-- DETONÁTOR TIMER PRO OBRAZOVKU (POUZE PRO POKEMONOVANOU) -->
+        <div id="host-detonator-box" class="detonator-box hidden">
           <div style="color: #ff3333; font-size: 0.85rem; letter-spacing: 2px; margin-bottom: 0.2rem; font-weight: bold;">💣 BOMB DETONATOR TIMER 💣</div>
           <div id="host-detonator-display" class="detonator-display">10.00</div>
           <div id="host-detonator-msg" style="color: #fff; font-size: 1.2rem; margin-top: 0.3rem; font-weight: bold;" class="hidden">💥 BOOM! ČAS VYPRŠEL! 💥</div>
@@ -328,9 +328,9 @@
       <button id="admin-action-btn" onclick="handleHostAction()">SPUSTIT 1. OTÁZKU ►</button>
     </div>
 
-    <!-- OVLÁDÁNÍ 10s DETONÁTORU PRO BONUS HRY (KOMPAKTNÍ ŘÁDEK) -->
-    <div style="background: #180808; padding: 0.8rem; border-radius: 12px; border: 1px solid var(--red); margin-bottom: 1.2rem; text-align: center;">
-      <h3 style="color: var(--red); margin-bottom: 0.2rem; font-size: 1rem;">💣 Detonátor (10s Odpočet)</h3>
+    <!-- OVLÁDÁNÍ 10s DETONÁTORU PRO POKEMONOVANOU (POUZE KDYŽ JE AKTIVNÍ POKEMONOVANÁ) -->
+    <div id="admin-detonator-control" class="hidden" style="background: #180808; padding: 0.8rem; border-radius: 12px; border: 1px solid var(--red); margin-bottom: 1.2rem; text-align: center;">
+      <h3 style="color: var(--red); margin-bottom: 0.2rem; font-size: 1rem;">💣 Detonátor - Pokemonovaná (10s)</h3>
       <div style="font-family: 'Orbitron', monospace; font-size: 1.8rem; color: var(--red); font-weight: bold; line-height: 1.1;" id="admin-timer-display">10.00</div>
       <div class="timer-btn-group">
         <button class="btn-timer-start" onclick="controlTimer('START')">▶ START</button>
@@ -666,16 +666,29 @@
         if(document.getElementById('host-game')) document.getElementById('host-game').classList.remove('hidden');
         if(document.getElementById('host-results-box')) document.getElementById('host-results-box').classList.add('hidden');
 
+        const isPokemonGame = qData && qData.isBonus && qData.bonusName === "Pokemonovaná";
+
         if (qData && qData.isBonus) {
           if(document.getElementById('host-cat-num')) document.getElementById('host-cat-num').innerText = `🏆 BONUS GAME | Hra ${currentQIndex + 1} z ${questions.length}`;
           if(document.getElementById('host-standard-box')) document.getElementById('host-standard-box').classList.add('hidden');
           if(document.getElementById('host-bonus-representatives')) document.getElementById('host-bonus-representatives').classList.remove('hidden');
           if(document.getElementById('host-bonus-title-screen')) document.getElementById('host-bonus-title-screen').innerText = `🏆 ${qData.bonusName}`;
+          
+          // Detonátor zapnout pouze pro Pokemonovanou
+          if (isPokemonGame) {
+            if (document.getElementById('host-detonator-box')) document.getElementById('host-detonator-box').classList.remove('hidden');
+            if (document.getElementById('admin-detonator-control')) document.getElementById('admin-detonator-control').classList.remove('hidden');
+          } else {
+            if (document.getElementById('host-detonator-box')) document.getElementById('host-detonator-box').classList.add('hidden');
+            if (document.getElementById('admin-detonator-control')) document.getElementById('admin-detonator-control').classList.add('hidden');
+          }
         } else if (qData) {
           if(document.getElementById('host-cat-num')) document.getElementById('host-cat-num').innerText = `${qData.cat} | Otázka ${currentQIndex + 1} z ${questions.length}`;
           if(document.getElementById('host-standard-box')) document.getElementById('host-standard-box').classList.remove('hidden');
           if(document.getElementById('host-bonus-representatives')) document.getElementById('host-bonus-representatives').classList.add('hidden');
           if(document.getElementById('host-q-text')) document.getElementById('host-q-text').innerText = qData.q;
+          if(document.getElementById('host-detonator-box')) document.getElementById('host-detonator-box').classList.add('hidden');
+          if(document.getElementById('admin-detonator-control')) document.getElementById('admin-detonator-control').classList.add('hidden');
         }
 
         if (qData) {
@@ -687,6 +700,7 @@
         if(document.getElementById('host-bonus-representatives')) document.getElementById('host-bonus-representatives').classList.add('hidden');
         if(document.getElementById('host-standard-box')) document.getElementById('host-standard-box').classList.add('hidden');
         if(document.getElementById('host-results-box')) document.getElementById('host-results-box').classList.remove('hidden');
+        if(document.getElementById('admin-detonator-control')) document.getElementById('admin-detonator-control').classList.add('hidden');
 
         if (qData && !qData.isBonus) {
           if(document.getElementById('host-correct-ans-container')) document.getElementById('host-correct-ans-container').classList.remove('hidden');
@@ -704,6 +718,7 @@
         if(document.getElementById('host-standard-box')) document.getElementById('host-standard-box').classList.add('hidden');
         if(document.getElementById('host-correct-ans-container')) document.getElementById('host-correct-ans-container').classList.add('hidden');
         if(document.getElementById('host-results-box')) document.getElementById('host-results-box').classList.remove('hidden');
+        if(document.getElementById('admin-detonator-control')) document.getElementById('admin-detonator-control').classList.add('hidden');
         
         if (document.getElementById('leaderboard-title')) {
           document.getElementById('leaderboard-title').innerText = "🏆 FINÁLNÍ VYHODNOCENÍ HRY";
