@@ -97,8 +97,11 @@
     .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); }
     .btn-kick { background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 0; width: auto; box-shadow: none; }
 
-    .btn-bonus { background: var(--green); color: #000; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer; margin: 0 0.2rem; width: auto; box-shadow: none; }
+    .btn-bonus { background: var(--green); color: #000; border: none; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin: 0 0.1rem; width: auto; box-shadow: none; }
     .btn-bonus:hover { background: #00c494; }
+
+    .btn-minus { background: var(--red); color: #fff; border: none; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin: 0 0.1rem; width: auto; box-shadow: none; }
+    .btn-minus:hover { background: #d00030; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
     th, td { padding: 0.6rem; text-align: left; border-bottom: 1px solid #222; }
@@ -107,9 +110,6 @@
     .icon-col { width: 40px; text-align: center; font-size: 1.1rem; }
     
     .rep-card { background: #181822; padding: 1rem; margin: 0.4rem 0; border-radius: 10px; border: 1px solid var(--neon-pink); font-size: 1.2rem; text-align: center; }
-    
-    .btn-launch-fs { background: #1c1c28; color: var(--green); border: 1px solid var(--green); font-size: 0.9rem; padding: 0.6rem; border-radius: 8px; margin-bottom: 1rem; cursor: pointer; text-transform: uppercase; font-weight: bold; }
-    .btn-launch-fs:hover { background: #00f0b522; }
 
     .correct-ans-card {
       background: rgba(0, 240, 181, 0.1);
@@ -317,8 +317,6 @@
   <!-- 4. ADMINISTRÁTORSKÁ STRÁNKA (?mode=admin) -->
   <div id="view-admin" class="hidden" style="overflow-y: auto; height: 100%;">
     <h2 class="neon-text">⚙️ Administrace a Řízení Kvízu</h2>
-    
-    <button class="btn-launch-fs" onclick="launchHostFullscreen()">🖥️ OTEVŘÍT PLÁTNO NA CELOU OBRAZOVKU</button>
 
     <!-- OVLÁDÁNÍ HRY -->
     <div style="background: #111118; padding: 1.2rem; border-radius: 12px; border: 1px solid var(--neon-pink); margin-bottom: 1rem; text-align: center;">
@@ -328,7 +326,7 @@
       <button id="admin-action-btn" onclick="handleHostAction()">SPUSTIT 1. OTÁZKU ►</button>
     </div>
 
-    <!-- OVLÁDÁNÍ 10s DETONÁTORU PRO POKEMONOVANOU (POUZE KDYŽ JE AKTIVNÍ POKEMONOVANÁ) -->
+    <!-- OVLÁDÁNÍ 10s DETONÁTORU PRO POKEMONOVANOU -->
     <div id="admin-detonator-control" class="hidden" style="background: #180808; padding: 0.8rem; border-radius: 12px; border: 1px solid var(--red); margin-bottom: 1.2rem; text-align: center;">
       <h3 style="color: var(--red); margin-bottom: 0.2rem; font-size: 1rem;">💣 Detonátor - Pokemonovaná (10s)</h3>
       <div style="font-family: 'Orbitron', monospace; font-size: 1.8rem; color: var(--red); font-weight: bold; line-height: 1.1;" id="admin-timer-display">10.00</div>
@@ -340,7 +338,7 @@
     </div>
 
     <div style="margin-bottom:2rem;">
-      <h3>Průběžné Body Týmů & Bonusy (+3, +2, +1 b.):</h3>
+      <h3>Průběžné Body Týmů & Úprava Bodů:</h3>
       <div id="admin-bonus-teams-list" style="margin-top:1rem;"></div>
     </div>
 
@@ -674,7 +672,6 @@
           if(document.getElementById('host-bonus-representatives')) document.getElementById('host-bonus-representatives').classList.remove('hidden');
           if(document.getElementById('host-bonus-title-screen')) document.getElementById('host-bonus-title-screen').innerText = `🏆 ${qData.bonusName}`;
           
-          // Detonátor zapnout pouze pro Pokemonovanou
           if (isPokemonGame) {
             if (document.getElementById('host-detonator-box')) document.getElementById('host-detonator-box').classList.remove('hidden');
             if (document.getElementById('admin-detonator-control')) document.getElementById('admin-detonator-control').classList.remove('hidden');
@@ -808,7 +805,6 @@
       return;
     }
 
-    // Resetovat časovač při přechodu na další otázku
     controlTimer('RESET');
 
     db.ref('teams').once('value', snapshot => {
@@ -923,9 +919,12 @@
           return `<div class="team-item">
                     <div><strong>${t.name}</strong> (${t.score || 0} b.)</div>
                     <div>
-                      <button class="btn-bonus" onclick="addBonusPoints('${k}', 3)">+3 b.</button>
-                      <button class="btn-bonus" onclick="addBonusPoints('${k}', 2)">+2 b.</button>
-                      <button class="btn-bonus" onclick="addBonusPoints('${k}', 1)">+1 b.</button>
+                      <button class="btn-bonus" onclick="adjustPoints('${k}', 3)">+3</button>
+                      <button class="btn-bonus" onclick="adjustPoints('${k}', 2)">+2</button>
+                      <button class="btn-bonus" onclick="adjustPoints('${k}', 1)">+1</button>
+                      <button class="btn-minus" onclick="adjustPoints('${k}', -1)">-1</button>
+                      <button class="btn-minus" onclick="adjustPoints('${k}', -2)">-2</button>
+                      <button class="btn-minus" onclick="adjustPoints('${k}', -3)">-3</button>
                     </div>
                   </div>`;
         }).join('');
@@ -943,7 +942,7 @@
     });
   }
 
-  function addBonusPoints(teamKey, points) {
+  function adjustPoints(teamKey, points) {
     db.ref(`teams/${teamKey}/score`).transaction(currentScore => {
       return (currentScore || 0) + points;
     });
@@ -952,16 +951,6 @@
   function deleteTeam(teamKey) {
     if (confirm("Opravdu chcete tento tým odstranit?")) {
       db.ref(`teams/${teamKey}`).remove();
-    }
-  }
-
-  function launchHostFullscreen() {
-    const baseUrl = window.location.href.split('?')[0];
-    const hostWin = window.open(`${baseUrl}?mode=host&autofs=true`, '_blank');
-    if (hostWin) {
-      hostWin.focus();
-    } else {
-      alert("Prohlížeč zablokoval vyskakovací okno. Povolte prosím pop-up okna pro tuto stránku.");
     }
   }
 </script>
