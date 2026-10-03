@@ -38,7 +38,7 @@
     
     /* REŽIM HOST / PLÁTNO */
     body.host-mode {
-      padding: 1vh 2vw;
+      padding: 1vh 1.5vw;
     }
     
     .container { 
@@ -58,15 +58,15 @@
     }
     
     body.host-mode .container { 
-      max-width: 95vw; 
-      height: 96dvh;
-      padding: 1.5rem 2rem; 
+      max-width: 98vw; 
+      height: 98dvh;
+      padding: 1rem 1.5rem; 
       border-radius: 20px; 
     }
     
-    .logo-container { text-align: center; margin-bottom: 0.3rem; flex-shrink: 0; }
+    .logo-container { text-align: center; margin-bottom: 0.2rem; flex-shrink: 0; }
     .logo-img { max-width: 160px; width: 45%; height: auto; filter: drop-shadow(0 0 12px var(--neon-pink-glow)); }
-    body.host-mode .logo-img { max-width: 260px; height: 50px; }
+    body.host-mode .logo-img { max-width: 220px; height: 42px; }
 
     h1, h2, h3 { color: #fff; margin-bottom: 0.3rem; text-align: center; }
     .neon-text { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink-glow); }
@@ -92,9 +92,9 @@
     .section-label { font-size: 0.85rem; color: #aaa; margin-top: 0.4rem; display: block; }
 
     .cat-image-box { width: 100%; height: 90px; border-radius: 10px; overflow: hidden; margin-bottom: 0.3rem; border: 1px solid #333; background-size: cover; background-position: center; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-    body.host-mode .cat-image-box { height: 180px; border-radius: 12px; margin-bottom: 0.8rem; }
+    body.host-mode .cat-image-box { height: 140px; border-radius: 12px; margin-bottom: 0.5rem; }
 
-    .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.6rem; margin: 0.4rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); }
+    .team-item { display: flex; justify-content: space-between; align-items: center; background: #0d0d11; padding: 0.4rem 0.6rem; margin: 0.25rem 0; border-radius: 6px; border-left: 3px solid var(--neon-pink); font-size: 0.95rem; }
     .btn-kick { background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 0; width: auto; box-shadow: none; }
 
     .btn-bonus { background: var(--green); color: #000; border: none; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin: 0 0.1rem; width: auto; box-shadow: none; }
@@ -103,20 +103,21 @@
     .btn-minus { background: var(--red); color: #fff; border: none; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin: 0 0.1rem; width: auto; box-shadow: none; }
     .btn-minus:hover { background: #d00030; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
-    th, td { padding: 0.6rem; text-align: left; border-bottom: 1px solid #222; }
-    body.host-mode th, body.host-mode td { font-size: 1.1rem; padding: 0.4rem 0.8rem; }
+    /* PŘIZPŮSOBENÍ TABULKY A SEZNAMŮ PRO AŽ 10 TÝMŮ */
+    table { width: 100%; border-collapse: collapse; margin-top: 0.3rem; }
+    th, td { padding: 0.4rem 0.6rem; text-align: left; border-bottom: 1px solid #222; }
+    body.host-mode th, body.host-mode td { font-size: 0.95rem; padding: 0.25rem 0.6rem; }
     th { color: var(--neon-pink); }
-    .icon-col { width: 40px; text-align: center; font-size: 1.1rem; }
+    .icon-col { width: 35px; text-align: center; font-size: 1rem; }
     
-    .rep-card { background: #181822; padding: 1rem; margin: 0.4rem 0; border-radius: 10px; border: 1px solid var(--neon-pink); font-size: 1.2rem; text-align: center; }
+    .rep-card { background: #181822; padding: 0.6rem 0.8rem; margin: 0.25rem 0; border-radius: 8px; border: 1px solid var(--neon-pink); font-size: 1rem; text-align: center; }
 
     .correct-ans-card {
       background: rgba(0, 240, 181, 0.1);
       border: 2px solid var(--green);
       border-radius: 10px;
-      padding: 0.8rem 1.2rem;
-      margin-bottom: 1rem;
+      padding: 0.6rem 1rem;
+      margin-bottom: 0.5rem;
       text-align: left;
     }
 
@@ -131,8 +132,8 @@
       background: #000000;
       border: 4px solid #ff1100;
       border-radius: 16px;
-      padding: 1.2rem;
-      margin: 0.8rem 0;
+      padding: 0.8rem;
+      margin: 0.4rem 0;
       text-align: center;
       box-shadow: 0 0 25px rgba(255, 0, 0, 0.6), inset 0 0 15px rgba(255, 0, 0, 0.4);
       position: relative;
@@ -153,7 +154,7 @@
 
     .detonator-display {
       font-family: 'Orbitron', monospace;
-      font-size: 3.5rem;
+      font-size: 2.8rem;
       color: #ff0000;
       text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
       letter-spacing: 4px;
@@ -264,52 +265,55 @@
   <!-- 3. OBRAZOVKA PRO PLÁTNO / PROJEKTOR (PROJEKCE - ŠIROKOÚHLÁ) -->
   <div id="view-host" class="hidden">
     <div id="host-setup" style="text-align: center;">
-      <p style="margin-bottom:0.8rem; color:#aaa; font-size:1.1rem;">Naskenujte QR kód a připojte se do hry:</p>
-      <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:1rem; background:#fff; padding:10px; border-radius:12px; width:fit-content; margin-left:auto; margin-right:auto;"></div>
+      <p style="margin-bottom:0.5rem; color:#aaa; font-size:1rem;">Naskenujte QR kód a připojte se do hry:</p>
+      <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:0.6rem; background:#fff; padding:8px; border-radius:12px; width:fit-content; margin-left:auto; margin-right:auto;"></div>
       
-      <h3 style="font-size:1.3rem;">Připojené týmy:</h3>
-      <div id="connected-teams-list" style="text-align:left; margin:0.8rem 0; max-height: 40vh; overflow-y: auto;"></div>
+      <h3 style="font-size:1.1rem; margin-bottom: 0.3rem;">Připojené týmy:</h3>
+      <!-- ZVĚTŠENÝ KONTEJNER, KTERÝ S PŘEHLEDEM POJME AŽ 10 TÝMŮ -->
+      <div id="connected-teams-list" style="text-align:left; margin:0.3rem 0; max-height: 55vh; overflow-y: auto;"></div>
     </div>
 
     <div id="host-game" class="hidden" style="display: flex; flex-direction: column; height: 100%;">
       <div id="host-cat-img" class="cat-image-box"></div>
 
-      <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size: 1.1rem;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem; font-size: 1rem;">
         <span id="host-cat-num" style="color:var(--neon-pink); font-weight:bold;">-</span>
         <span id="host-votes-count" style="color:var(--green); font-weight:bold;">Odhlasováno: 0 / 0</span>
       </div>
 
       <!-- STANDARDNÍ OTÁZKA NA PLÁTNĚ -->
       <div id="host-standard-box">
-        <h2 id="host-q-text" style="font-size:1.8rem; margin:0.8rem 0; text-align:left; line-height: 1.25;">-</h2>
+        <h2 id="host-q-text" style="font-size:1.6rem; margin:0.5rem 0; text-align:left; line-height: 1.25;">-</h2>
       </div>
 
       <!-- ZOBRAZENÍ BONUSOVÉ HRY A ZÁSTUPCŮ NA PLÁTNĚ -->
-      <div id="host-bonus-representatives" class="hidden">
-        <h1 class="neon-text" id="host-bonus-title-screen" style="font-size: 2rem; margin: 0.3rem 0;">🏆 BONUS GAME</h1>
+      <div id="host-bonus-representatives" class="hidden" style="flex: 1; overflow-y: auto;">
+        <h1 class="neon-text" id="host-bonus-title-screen" style="font-size: 1.8rem; margin: 0.2rem 0;">🏆 BONUS GAME</h1>
         
         <!-- DETONÁTOR TIMER PRO OBRAZOVKU (POUZE PRO POKEMONOVANOU) -->
         <div id="host-detonator-box" class="detonator-box hidden">
-          <div style="color: #ff3333; font-size: 0.85rem; letter-spacing: 2px; margin-bottom: 0.2rem; font-weight: bold;">💣 BOMB DETONATOR TIMER 💣</div>
+          <div style="color: #ff3333; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 0.2rem; font-weight: bold;">💣 BOMB DETONATOR TIMER 💣</div>
           <div id="host-detonator-display" class="detonator-display">10.00</div>
-          <div id="host-detonator-msg" style="color: #fff; font-size: 1.2rem; margin-top: 0.3rem; font-weight: bold;" class="hidden">💥 BOOM! ČAS VYPRŠEL! 💥</div>
+          <div id="host-detonator-msg" style="color: #fff; font-size: 1.1rem; margin-top: 0.2rem; font-weight: bold;" class="hidden">💥 BOOM! ČAS VYPRŠEL! 💥</div>
         </div>
 
-        <p style="text-align:center; color:#aaa; margin-bottom:0.5rem; font-size: 1rem;">Zástupci týmů, vyslaní na pódium:</p>
-        <div id="representatives-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem;"></div>
+        <p style="text-align:center; color:#aaa; margin-bottom:0.3rem; font-size: 0.9rem;">Zástupci týmů, vyslaní na pódium:</p>
+        <div id="representatives-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.4rem;"></div>
       </div>
 
-      <div id="host-results-box" class="hidden">
+      <div id="host-results-box" class="hidden" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
         <div id="host-correct-ans-container" class="correct-ans-card">
-          <p style="font-size: 0.95rem; color: #aaa; margin-bottom: 0.2rem;" id="host-result-q-label">Otázka: -</p>
-          <h3 style="color:var(--green); text-align:left; font-size: 1.3rem; margin: 0;">Správná odpověď: <span id="host-correct-ans"></span></h3>
+          <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 0.1rem;" id="host-result-q-label">Otázka: -</p>
+          <h3 style="color:var(--green); text-align:left; font-size: 1.15rem; margin: 0;">Správná odpověď: <span id="host-correct-ans"></span></h3>
         </div>
 
-        <h3 id="leaderboard-title" style="margin-top:0.5rem; text-align:left; font-size: 1.2rem;">Průběžné Pořadí:</h3>
-        <table>
-          <thead><tr><th class="icon-col"></th><th>#</th><th>Tým</th><th>Body</th></tr></thead>
-          <tbody id="leaderboard-body"></tbody>
-        </table>
+        <h3 id="leaderboard-title" style="margin-top:0.2rem; text-align:left; font-size: 1.1rem;">Průběžné Pořadí:</h3>
+        <div style="flex: 1; overflow-y: auto;">
+          <table>
+            <thead><tr><th class="icon-col"></th><th>#</th><th>Tým</th><th>Body</th></tr></thead>
+            <tbody id="leaderboard-body"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -720,7 +724,7 @@
         if (document.getElementById('leaderboard-title')) {
           document.getElementById('leaderboard-title').innerText = "🏆 FINÁLNÍ VYHODNOCENÍ HRY";
           document.getElementById('leaderboard-title').className = "neon-text";
-          document.getElementById('leaderboard-title').style.fontSize = "2rem";
+          document.getElementById('leaderboard-title').style.fontSize = "1.8rem";
         }
         renderFinalLeaderboard();
       }
@@ -896,7 +900,7 @@
           else if (i === 2) medalIcon = "🥉";
 
           return `
-            <tr style="${i === 0 ? 'background: rgba(255,215,0,0.15); font-size:1.3rem;' : ''}">
+            <tr style="${i === 0 ? 'background: rgba(255,215,0,0.15); font-size:1.1rem;' : ''}">
               <td class="icon-col">${medalIcon}</td>
               <td>#${i+1}</td>
               <td><strong>${t.name}</strong></td>
